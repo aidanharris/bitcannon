@@ -1,0 +1,30 @@
+{
+  "mongo": "127.0.0.1",
+  "bitcannonPort": "1337",
+  "scrapeEnabled": true,
+  "scrapeDelay": 0,
+  "trackers": [
+    "udp://open.demonii.com:1337",
+    "udp://tracker.istole.it:80",
+    "udp://tracker.openbittorrent.com:80",
+    "udp://tracker.publicbt.com:80",
+    "udp://tracker.coppersurfer.tk:6969",
+    "udp://tracker.leechers-paradise.org:6969",
+    "udp://exodus.desync.com:6969"
+  ],
+  "blacklistEnabled": false,
+  "blacklistedCategories": [
+    "Category to blacklist 1",
+    "Category to blacklist 2"
+  ],
+  "categoryAliases": {
+    "transportation": ["boats","cars","planes"]
+  },
+  "archives": [{
+    "name": "Site1",
+    "frequency": 3600
+  }, {
+    "name": "Site2",
+    "frequency": 86400
+  }]
+}

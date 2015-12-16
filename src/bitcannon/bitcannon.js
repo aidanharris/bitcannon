@@ -61,7 +61,14 @@ module.exports = function () {
 
     }
 
+    var loadConfigFile = function() {
+        //if error
+        //return this.config
+        //else return parsed JSON from config file
+    }
+
     return {
-        config: config()
+        config: config(),
+        loadConfigFile: loadConfigFile
     }
 }();
