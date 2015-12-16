@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/stephen304/bitcannon/issues"
   },
-  "homepage": "https://github.com/stephen304/bitcannon#readme"
+  "homepage": "https://github.com/stephen304/bitcannon#readme",
+  "dependencies": {
+    "express": "^4.13.3"
+  }
 }
