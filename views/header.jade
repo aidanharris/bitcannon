@@ -1,0 +1,22 @@
+div(class='navbar navbar-inverse navbar-fixed-top')
+    div.container
+        div.navbar-header
+            button.navbar-toggle(type='button', data-toggle='collapse', data-target='.navbar-collapse')
+                span.icon-bar
+                span.icon-bar
+                span.icon-bar
+            a.navbar-brand(ui-sref='index')
+                |BitCannon
+        div(class='collapse navbar-collapse')
+            ul(class='nav navbar-nav')
+                li(ui-sref-active='active')
+                    a(ui-sref='browse')
+                        |Browse
+                li(ui-sref-active='active')
+                    a(ui-sref='about')
+                        |About
+            ul(class='nav navbar-nav navbar-right')
+                li
+                    a(href='', data-toggle='modal', data-target='#settingsModal')
+                        |Settings
+                        span.caret

@@ -1,0 +1,12 @@
+<div class="container">
+  <div class="row">
+    <div ng-repeat="category in categories" class="col-md-3">
+      <h3>
+        <a ui-sref="browseSearch({category: '{{category.name}}'})">{{category.name}}</a>
+      </h3>
+      <p>
+        {{category.count}} torrents in this category.
+      </p>
+    </div>
+  </div>
+</div>

@@ -11,6 +11,24 @@ html
     link(rel='stylesheet', href='bower_components/bootswatch-dist/css/bootstrap.css')
     link(rel='stylesheet', href='bower_components/angular-loading-bar/build/loading-bar.css')
     link(rel='stylesheet', href='bower_components/fontawesome/css/font-awesome.css')
-    link(rel='stylesheet', href='/stylesheets/style.css')
-  body
-    block content
+    link(rel='stylesheet', href='/stylesheets/main.css')
+    <!-- endbuild -->
+  body(ng-app="bitCannonApp")
+    <!--[if lt IE 7]>
+    | <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
+
+    include header
+
+    div.container(ng-if='message', ng-cloak=)
+      div(class='alert alert-warning alert-dismissible', role='alert')
+        button.close(type='button', aria-label='Close', ng-click='clearMessage()')
+          span(aria-hidden='true')
+            |&times;
+        strong
+          |Warning:
+        |{{message}}
+
+    div(ui-view='', ng-controller='MainCtrl')
+
+    include footer
