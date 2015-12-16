@@ -2,3 +2,5 @@
 public/bower_components
 BitCannon.zip
 .DS_Store
+.idea/
+node_modules
