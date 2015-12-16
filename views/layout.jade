@@ -1,7 +1,16 @@
 doctype html
 html
-  head
-    title= title
+  head.no-js
+    meta(charset='utf-8')
+    title
+    meta(name='description' content='')
+    meta(name='viewport' content='width=device-width')
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+    <!-- build:css(.) styles/vendor.css -->
+    <!-- bower:css -->
+    link(rel='stylesheet', href='bower_components/bootswatch-dist/css/bootstrap.css')
+    link(rel='stylesheet', href='bower_components/angular-loading-bar/build/loading-bar.css')
+    link(rel='stylesheet', href='bower_components/fontawesome/css/font-awesome.css')
     link(rel='stylesheet', href='/stylesheets/style.css')
   body
     block content
