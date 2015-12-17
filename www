@@ -4,15 +4,38 @@
  * Module dependencies.
  */
 
-var app = require('../main');
-var debug = require('debug')('bitcannon:server');
+var serverDirectory = __dirname + '/src/server';
+var debug = require(serverDirectory + '/node_modules/debug');
+
+var bitcannon = require(__dirname + '/src/bitcannon/bitcannon.js')(__dirname + '/config.json');
+
+switch (bitcannon.config.debugLevel()) {
+    case 1:
+        debug.enable('express:*');
+    case 0:
+    default:
+        debug.enable('bitcannon:*');
+        break;
+}
+
+var app = require(serverDirectory + '/main');
+
 var http = require('http');
+
+debug = debug('bitcannon:server');
+
+bitcannon.log("Connecting to " + bitcannon.database.name);
+if(bitcannon.database.open() == false) {
+    bitcannon.error("[ERR] I'm sorry! I Couldn't connect to "+ bitcannon.database.name + ".");
+    bitcannon.log("Please make sure it is installed and running.");
+    //process.exit();
+}
 
 /**
  * Get port from environment and store in Express.
  */
-
-var port = normalizePort(process.env.PORT || '3000');
+var port = normalizePort(bitcannon.config.bitcannonPort());
+var address = bitcannon.config.bitcannonBindIp();
 app.set('port', port);
 
 /**
@@ -25,7 +48,7 @@ var server = http.createServer(app);
  * Listen on provided port, on all network interfaces.
  */
 
-server.listen(port);
+server.listen(port,address);
 server.on('error', onError);
 server.on('listening', onListening);
 
@@ -86,5 +109,6 @@ function onListening() {
   var bind = typeof addr === 'string'
     ? 'pipe ' + addr
     : 'port ' + addr.port;
-  debug('Listening on ' + bind);
+  debug('Listening on ' + address + ':' + port);
+  debug('[OK!] BitCannon is live at http://' + ((address == '0.0.0.0') ? '127.0.0.1' : address) + ':' + port + '/');
 }

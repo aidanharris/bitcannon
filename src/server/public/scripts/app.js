@@ -65,7 +65,7 @@ angular
   })
   .run(function($rootScope, $window, $http) {
     if (typeof $window.localStorage.api === 'undefined' || $window.localStorage.api === '') {
-      $rootScope.api = '';// Old default http://localhost:1337
+      $rootScope.api = '/api/v1.0/';// Old default http://localhost:1337
     }
     else {
       $rootScope.api = $window.localStorage.api;

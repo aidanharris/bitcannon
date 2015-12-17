@@ -25,9 +25,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
 
-for(i = 0; i < api.endpoints.length; i++) {
-    app.use(api.endpoints[i], api);
-}
+app.use('/api/v:major([0-9]).:minor([0-9])/', api);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
