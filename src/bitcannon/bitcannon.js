@@ -23,6 +23,10 @@ module.exports = function (configFile) {
 
     var config = function () {
         //Shortcuts to nconf.get so we can get the value of something via config.value()
+        /*
+        To DO
+            * Make this less DRY (https://en.wikipedia.org/wiki/Don%27t_repeat_yourself)
+         */
         return {
             bitcannonPort: function(){return nconf.get('bitcannonPort');},
             bitcannonBindIp: function(){return nconf.get('bitcannonBindIp');},

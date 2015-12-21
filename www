@@ -22,6 +22,9 @@ switch (bitcannon.config.debugLevel()) {
         break;
 }
 
+//Enable debugging for the bitcannon server
+debug.enable('bitcannon:server');
+
 debug = debug('bitcannon:server');
 
 bitcannon.log("Connecting to " + bitcannon.database.name);
