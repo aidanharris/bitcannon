@@ -169,28 +169,31 @@ var error = databaseHelper.error;
        "Title": "Example Torrent 1"
        }]
        */
-      var category = function(cat) {
-          return [{
-              "Btih": "Btih1",
-              "Category": "Movies",
-              "Details": [
-                  "http://example.com"
-              ],
-              "Imported": "2015-04-02T13:15:24.943+01:00",
-              "Lastmod": "2015-04-03T18:52:29.186+01:00",
-              "Size": 0,
-              "Swarm": {
-                  "Leechers": 2598,
-                  "Seeders": 1781
-              },
-              "Title": "Example Torrent 1"
-          }];
+      var category = function(category,limit,callback) {
+          bitcannonTorrentsModel.find({category: category}).limit(limit).sort({'swarm.seeders':-1}).exec(function(err,torrents) {
+              if(err) {
+                  callback(err);
+              } else {
+                  callback(err,torrents);
+              }
+          });
+      };
+
+      var torrent = function(btih,callback) {
+          bitcannonTorrentsModel.findOne({_id: btih}).exec(function(err,torrent) {
+             if(err) {
+                 callback(err);
+             } else {
+                 callback(err,torrent);
+             }
+          });
       };
 
       return {
           stats: stats,
           categories: categories,
-          category: category
+          category: category,
+          torrent: torrent
       };
     };
 
