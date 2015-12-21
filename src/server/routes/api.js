@@ -1,4 +1,4 @@
-var bitcannon = require('../../bitcannon/bitcannon');
+var bitcannon = require('../../bitcannon')();
 var express = require('express');
 var router = express.Router();
 
@@ -17,53 +17,40 @@ router.endpoints = [
 var api = require('../../bitcannon/api');
 
 router.get('/', function (req, res, next) {
-   api.unsupported(req,res, function () {
+   api.unsupported(req, res, next, function () {
        res.json({status: 'OK'});
    });
 });
 
 router.get('/stats', function (req, res, next) {
-    api.unsupported(req,res, function () {
-        res.json({
-            "Count": 11019460,
-            "Trackers": [
-                "udp://open.demonii.com:1337",
-                "udp://tracker.istole.it:80",
-                "udp://tracker.openbittorrent.com:80",
-                "udp://tracker.publicbt.com:80",
-                "udp://tracker.coppersurfer.tk:6969",
-                "udp://tracker.leechers-paradise.org:6969",
-                "udp://exodus.desync.com:6969"
-            ]
+    api.unsupported(req, res, next, function () {
+        bitcannon.database.get.stats(function(err, count){
+            if(err) {
+                res.status(500).send();
+            } else {
+                res.json({
+                    "Count": count,
+                    "Trackers": bitcannon.config.trackers()
+                });
+            }
         });
     });
 });
 
 router.get('/browse', function (req, res, next) {
-    api.unsupported(req,res, function () {
-        res.json([
-            {
-                "count": 247869,
-                "name": "Movies"
-            },
-            {
-                "count": 172654,
-                "name": "Music"
-            },
-            {
-                "count": 33,
-                "name": "Music Videos"
-            },
-            {
-                "count": 169388,
-                "name": "Other"
+    api.unsupported(req, res, next, function () {
+        bitcannon.database.get.categories(function(err, categories){
+            if(err) {
+                res.status(500).send();
+            } else {
+                res.json(categories);
             }
-        ]);
+        });
     });
 });
 
 router.get('/browse/:category', function(req, res, next) {
-    api.unsupported(req,res, function () {
+    api.unsupported(req, res, next, function () {
         res.json([{
                 "Btih": "Btih1",
                 "Category": "Movies",
@@ -114,7 +101,7 @@ router.get('/browse/:category', function(req, res, next) {
 });
 
 router.get(['/browse/torrent/:btih','/torrent/:btih'], function(req, res, next) {
-    api.unsupported(req, res, function () {
+    api.unsupported(req, res, next, function () {
         res.json({
             "Btih": "Btih1",
             "Category": "Games PC",
@@ -134,7 +121,7 @@ router.get(['/browse/torrent/:btih','/torrent/:btih'], function(req, res, next) 
 });
 
 router.get('/scrape/:btih', function(req, res, next) {
-    api.unsupported(req, res, function() {
+    api.unsupported(req, res, next, function() {
         res.json({
             "Lastmod": "2015-12-17T01:30:32.185731072Z",
             "Swarm": {
@@ -164,8 +151,8 @@ router.get('/search/:query/c/:category/s/:skip', function(req, res, next) {
 //Catch all
 router.get(/^(.*)$/, function(req, res, next){
     //All routers must call api.unsupported with a callback function in order to verify if the API version trying to be used is valid
-    api.unsupported(req,res,function() {
-        res.send(404); //If the version number is okay we send a 404 Not Found because the resource requested does not exist
+    api.unsupported(req, res, next, function() {
+        res.status(404).send(); //If the version number is okay we send a 404 Not Found because the resource requested does not exist
     });
 });
 

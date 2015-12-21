@@ -1,11 +1,12 @@
+"use strict";
+
 var fs = require('fs');
 var nconf = require('nconf');
 
 var debug = require('../server/node_modules/debug');
 
-//Enable debugging
-debug.enable('bitcannon:core');
-debug.enable('bitcannon:core:error');
+//Enable debugging for bitcannon
+debug.enable('bitcannon:*');
 
 //Bind log to console.log
 var log = debug('bitcannon:core');
@@ -115,29 +116,119 @@ module.exports = function (configFile) {
        }
     };
 
-    var database = undefined;
+    module.exports._configFileLoaded = false;
 
+    /*
+    To Do
+     * Add a function to reload configuration
+        * Set module.exports._configFileLoaded to false
+        * Call loadConfigFile function again
+     */
     var loadConfigFile = function(configFile) {
-        nconf.argv().env().file({ file: configFile }),
-            setDefaults()
+        if(typeof configFile !== 'undefined' && !module.exports._configFileLoaded) {
+            nconf.argv().env().file({file: configFile}),
+                setDefaults(),
+                //Test that the config file can be read.
+                //If it can set the configFileLoaded flag to true
+                //Else log error information
+                fs.access(configFile, fs.R_OK, function(err) {
+                    if(!err) {
+                       module.exports._configFileLoaded = true;
+                    } else {
+                        error("[ERR] Cannot open " + configFile + " for reading. Does it Exist?");
+                        error("Falling back to default configuration.");
+                    }
+                });
             //Should validate configuration here...
             try {
-                database = require('../providers/database/' + config.database() + '/' + config.database());
+                module.exports.database = require('../providers/database/' + config.database() + '/' + config.database());
             }
             catch (err) {
                 error('Error loading database provider module: ' + config.database());
+                if(config.debugLevel() > 0) {
+                    error(err);
+                }
                 //Log error and fall back to default database
-                setDefaults('database', function() {
-                    log('Falling back to default: ' + nconf.get('database'));
+                setDefaults('database', function () {
+                    error('Falling back to default: ' + nconf.get('database'));
                 });
-
-                database = require('../providers/database/' + config.database() + '/' + config.database());
+                module.exports.database = require('../providers/database/' + config.database());
             }
+        }
     }(configFile);
 
+    var exit = function(exitCode) {
+        log('BitCannon is shutting down...');
+        /*
+        To Do
+            * Close any open database connections here.
+         */
+        process.exit(((typeof exitCode === 'undefined') ? 1 : exitCode));
+    };
+
+    process.on('SIGINT',function(){
+        exit(0);
+    });
+
+    var providers = function() {
+        function logFn(provider) {
+            //Bind log to console.log
+            var log = debug('bitcannon:providers' + provider);
+            log.log = console.log.bind(console);
+
+            return log;
+        }
+
+        function errorFn(provider) {
+            //Bind error to console.warn
+            var error = debug('bitcannon:providers' + provider);
+            error.log = console.warn.bind(console);
+
+            return error;
+        }
+
+        var logging = function(providerType,provider) {
+            var logs = function(providerType, provider) {
+                return logFn(':' + providerType +':' + provider);
+            }(providerType,provider);
+            var errors = function(providerType, provider) {
+                return errorFn(':' + providerType +':' + provider + ':error');
+            }(providerType,provider);
+
+            return {
+                log: logs,
+                error: errors
+            }
+        };
+
+        var archives = function(provider) {
+            var logger = logging('database',provider);
+            return {
+                log: logger.log,
+                error: logger.error
+            }
+        };
+
+        var database = function(provider) {
+            var logger = logging('database',provider);
+
+            return {
+                log: logger.log,
+                error: logger.error
+            }
+
+        };
+
+        return {
+            archives: archives,
+            database: database
+        };
+    }();
     return {
         config: config,
-        database: database,
+        database: module.exports.database,
+        exit: exit,
+        providers: providers,
         log: log,
         error: error
     }

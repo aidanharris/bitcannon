@@ -1,0 +1,14 @@
+{
+  "name": "mongodb",
+  "version": "1.0.0",
+  "description": "A mongodb database provider for BitCannon",
+  "main": "mongodb.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Aidan Harris",
+  "license": "MIT",
+  "dependencies": {
+    "mongoose": "^4.3.2"
+  }
+}

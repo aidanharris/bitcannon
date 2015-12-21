@@ -5,31 +5,42 @@
  */
 
 var serverDirectory = __dirname + '/src/server';
-var debug = require(serverDirectory + '/node_modules/debug');
+var debug = require('debug');
 
-var bitcannon = require(__dirname + '/src/bitcannon/bitcannon.js')(__dirname + '/config.json');
+var bitcannon = require('./src/bitcannon')(__dirname + '/config.json');
 
+//To do:
+// * Add more debug levels - At the moment we just have basic error messages, stacktraces and debug output from express
 switch (bitcannon.config.debugLevel()) {
+    case 2:
+        debug.enable('express:*'); //Detailed output from the express web server
     case 1:
-        debug.enable('express:*');
+        //Detailed error messages e.g stacktraces
     case 0:
+        //Default logging i.e error messages only
     default:
-        debug.enable('bitcannon:*');
         break;
 }
-
-var app = require(serverDirectory + '/main');
-
-var http = require('http');
 
 debug = debug('bitcannon:server');
 
 bitcannon.log("Connecting to " + bitcannon.database.name);
-if(bitcannon.database.open() == false) {
-    bitcannon.error("[ERR] I'm sorry! I Couldn't connect to "+ bitcannon.database.name + ".");
-    bitcannon.log("Please make sure it is installed and running.");
-    //process.exit();
-}
+
+bitcannon.database.test(function(err) {
+    if(err) {
+        bitcannon.error("[ERR] I'm sorry! I Couldn't connect to "+ bitcannon.database.name + ".");
+        bitcannon.error("Please make sure it is installed and running.");
+        bitcannon.exit(1);
+    } else {
+        //Start the task scheduler for archive providers
+    }
+});
+
+var app = require(serverDirectory + '/main');
+
+app.disable('x-powered-by');
+
+var http = require('http');
 
 /**
  * Get port from environment and store in Express.

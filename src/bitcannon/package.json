@@ -2,7 +2,7 @@
   "name": "bitcannon",
   "version": "0.0.0",
   "description": "A torrent index archiving, browsing, and backup tool",
-  "main": "main.js",
+  "main": "bitcannon.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/stephen304/bitcannon.git"
