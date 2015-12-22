@@ -74,7 +74,7 @@ router.get('/browse/:category', function(req, res, next) {
                 .replace(new RegExp('"title":','g'),'"Title":'),
                 (function(err,torrents){
                     if(err) {
-                        res.send(500).send();
+                        res.status(500).send();
                     } else {
                         res.json(JSON.parse(torrents));
                     }
@@ -103,7 +103,7 @@ router.get(['/browse/torrent/:btih','/torrent/:btih'], function(req, res, next) 
                 .replace(new RegExp('"title":','g'),'"Title":'),
                 (function(err,torrent){
                     if(err) {
-                        res.send(500).send();
+                        res.status(500).send();
                     } else {
                         res.json(JSON.parse(torrent));
                     }
