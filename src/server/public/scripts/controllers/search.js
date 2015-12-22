@@ -40,8 +40,10 @@ angular.module('bitCannonApp')
             $rootScope.message = data.message;
           }
         }).
-        error(function() {
-          $rootScope.message = 'API Request failed.';
+        error(function(data,status) {
+          if($scope.results.length === 0 && status === 404) {
+              $rootScope.message = (data.error !== undefined) ? ' ' + data.error : 'API Request failed.';
+          }
         });
     };
   });

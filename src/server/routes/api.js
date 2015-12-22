@@ -152,12 +152,15 @@ router.get('/scrape/:btih', function(req, res, next) {
 });
 
 router.get(['/search/:query','/search/:query/s/:skip','/search/:query/c/:category','/search/:query/c/:category/s/:skip'], function(req, res, next) {
-    req.params.skip = (req.params.skip === undefined) ? 0 : req.params.skip;
+    req.params.skip = (req.params.skip === undefined) ? 0 : parseInt(req.params.skip);
     api.unsupported(req, res, next, function(){
         bitcannon.database.get.search(req.params.query,req.params.category,req.params.skip,function(err,torrents) {
            if(err) {
-               res.statusCode(500).send();
+               res.status(500).send();
            } else {
+               if(torrents.length === 0) {
+                   return res.status(404).type('json').send("{\"error\": \"" + "No results found for " + req.params.query + "\"}");
+               }
                torrents = JSON.stringify(torrents)
                    .replace(new RegExp('"_id":','g'),'"Btih":')
                    .replace(new RegExp('"category":','g'),'"Category":')
@@ -169,7 +172,7 @@ router.get(['/search/:query','/search/:query/s/:skip','/search/:query/c/:categor
                    .replace(new RegExp('"leechers":','g'),'"Leechers":')
                    .replace(new RegExp('"seeders":','g'),'"Seeders":')
                    .replace(new RegExp('"title":','g'),'"Title":');
-               res.json(JSON.parse(torrents));
+               return res.json(JSON.parse(torrents));
            }
         });
     });
@@ -179,7 +182,7 @@ router.get(['/search/:query','/search/:query/s/:skip','/search/:query/c/:categor
 router.get(/^(.*)$/, function(req, res, next){
     //All routers must call api.unsupported with a callback function in order to verify if the API version trying to be used is valid
     api.unsupported(req, res, next, function() {
-        res.status(404).send(); //If the version number is okay we send a 404 Not Found because the resource requested does not exist
+        return res.status(404).type('json').send("{\"error\": \"" + require('../statuses')[404] + "\"}"); //If the version number is okay we send a 404 Not Found because the resource requested does not exist
     });
 });
 
