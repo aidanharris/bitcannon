@@ -151,10 +151,10 @@ router.get('/scrape/:btih', function(req, res, next) {
     });
 });
 
-router.get(['/search/:query','/search/:query/s/:skip'], function(req, res, next) {
+router.get(['/search/:query','/search/:query/s/:skip','/search/:query/c/:category','/search/:query/c/:category/s/:skip'], function(req, res, next) {
     req.params.skip = (req.params.skip === undefined) ? 0 : req.params.skip;
     api.unsupported(req, res, next, function(){
-        bitcannon.database.get.search(req.params.query,req.params.skip,function(err,torrents) {
+        bitcannon.database.get.search(req.params.query,req.params.category,req.params.skip,function(err,torrents) {
            if(err) {
                res.statusCode(500).send();
            } else {
@@ -173,14 +173,6 @@ router.get(['/search/:query','/search/:query/s/:skip'], function(req, res, next)
            }
         });
     });
-});
-
-router.get('/search/:query/c/:category', function(req, res, next) {
-
-});
-
-router.get('/search/:query/c/:category/s/:skip', function(req, res, next) {
-
 });
 
 //Catch all

@@ -80,8 +80,8 @@ var error = databaseHelper.error;
     var get = function() {
 
       //database.get.search
-      var search = function(searchTerm, skip, callback) {
-          bitcannonTorrentsModel.collection.aggregate({$match: {$text: {$search: searchTerm}}},{$sort: {"swarm.seeders": -1}},{"$skip":0},{"$limit":200},function(err,torrents) {
+      var search = function(searchTerm, category, skip, callback) {
+          bitcannonTorrentsModel.collection.aggregate({$match: {$text: {$search: searchTerm}}},((category === undefined) ? {$match: {category: /^(.*)$/}} : {$match: {category: category}}),{$sort: {"swarm.seeders": -1}},{"$skip":0},{"$limit":200},function(err,torrents) {
               if(err) {
                   error(err);
               }
