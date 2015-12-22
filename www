@@ -5,21 +5,14 @@
  */
 
 var serverDirectory = __dirname + '/src/server';
-var debug = require('debug');
+var debug = require('./src/server/node_modules/debug');
 
 var bitcannon = require('./src/bitcannon')(__dirname + '/config.json');
 
 //To do:
 // * Add more debug levels - At the moment we just have basic error messages, stacktraces and debug output from express
-switch (bitcannon.config.debugLevel()) {
-    case 2:
-        debug.enable('express:*'); //Detailed output from the express web server
-    case 1:
-        //Detailed error messages e.g stacktraces
-    case 0:
-        //Default logging i.e error messages only
-    default:
-        break;
+if (bitcannon.config.debugLevel() > 1) {
+    debug. enable('express:*'); //Detailed output from the express web server
 }
 
 //Enable debugging for the bitcannon server

@@ -1,3 +1,5 @@
+"use strict";
+
 var bitcannon = require('../../../bitcannon')();
 var mongoose = require('mongoose');
 
@@ -11,19 +13,7 @@ var log = databaseHelper.log;
 var error = databaseHelper.error;
 
     //Bitcannon Database Structure
-    var bitcannonTorrentSchema = new Schema( {
-        _id: String,
-        title: String,
-        category: String,
-        size: Number,
-        details: Array,
-        swarm: {
-            seeders: Number,
-            leechers: Number
-        },
-        lastmod: Date,
-        imported: Date
-    });
+    var bitcannonTorrentSchema = new Schema(databaseHelper.schema);
 
     var bitcannonTorrentsModel = mongoose.model('torrents', bitcannonTorrentSchema);
 
@@ -34,29 +24,37 @@ var error = databaseHelper.error;
     var open = function(callback) {
         //If we are already connected we don't need to open another connection
         //Doing so would cause an error
-        if(mongoose.connection.readyState != 1) {
+        if(mongoose.connection.readyState !== 1) {
             mongoose.connect(dbURI);
             var db = mongoose.connection;
 
             // CONNECTION EVENTS
             // When successfully connected
             db.on('connected', function () {
-                callback()
+                if(typeof(callback) === 'function') {
+                    return callback();
+                }
             });
 
             // If the connection throws an error
             db.on('error', function (err) {
-                callback(err)
+                if(typeof(callback) === 'function') {
+                    return callback(err);
+                }
             });
         } else {
             //We have a connection so trigger the callback
-            callback();
+            if(typeof(callback) === 'function') {
+                return callback();
+            }
         }
     };
 
     var close = function(callback) {
         mongoose.connection.close(function() {
-            callback();
+            if(typeof(callback) === 'function') {
+                return callback();
+            }
         });
     };
 
@@ -65,15 +63,15 @@ var error = databaseHelper.error;
         // Create the database connection
         var conn = open(function (err) {
             if(err) {
-                error('[ERR] Error connecting to MongoDB:');
                 error(err.message);
                 if(bitcannon.config.debugLevel() > 0) {
                     error(err);
                 }
-                return callback(err);
             } else {
                 log('[OK!] Sucessfully connected to ' + dbURI);
-                return callback();
+            }
+            if(typeof(callback) === 'function') {
+                return callback(err);
             }
         });
     };
@@ -90,14 +88,17 @@ var error = databaseHelper.error;
         }
       */
       var stats = function(callback) {
-          var conn = open(function(err) {
-              bitcannonTorrentsModel.collection.stats(function (err, torrents) {
-                  if(err) {
+          bitcannonTorrentsModel.collection.stats(function (err, torrents) {
+              if(err) {
+                  error(err);
+                  if(typeof(callback) === 'function') {
                       callback(err);
-                  } else {
-                      callback(err,torrents.count);
                   }
-              });
+              } else {
+                  if(typeof(callback) === 'function') {
+                      callback(err, torrents.count);
+                  }
+              }
           });
       };
 
@@ -111,9 +112,14 @@ var error = databaseHelper.error;
       var categories = function (callback) {
           //Get all categories
           bitcannonTorrentsModel.collection.distinct('category',function(err, categories) {
-              if(err) return callback(err);
-              var categoriesJSON = [];
-              var categoriesLength = categories.length;
+              if(err) {
+                  error(err);
+                  if(typeof(callback) === 'function') {
+                      return callback(err);
+                  }
+              }
+              let categoriesJSON = [];
+              let categoriesLength = categories.length;
               for(var i = 0; i < categoriesLength;i++) {
                   categoriesJSON.push(
                       {
@@ -125,13 +131,19 @@ var error = databaseHelper.error;
                   //Because Node.js is asynchronous this is necessary since
                   //the function below will fire at different times for each index i
                   var asyncOperations = 0;
-                  var getCategoryCount = function(i,callback) {
+                  //jshint loopfunc: true
+                  const getCategoryCount = function(i,callback) {
                       bitcannonTorrentsModel.count({category: categoriesJSON[i].name},function(err,count) {
-                          if(err) return callback(err);
+                          if(err) {
+                              error(err);
+                              return callback(err);
+                          }
                           categoriesJSON[i].count = count;
                           asyncOperations++;
-                          if(asyncOperations == categoriesLength) {
-                              return callback(err,categoriesJSON.reverse());
+                          if(asyncOperations === categoriesLength) {
+                              if(typeof(callback) === 'function') {
+                                  return callback(err, categoriesJSON.reverse());
+                              }
                           }
                       });
                   }(i,callback);
@@ -172,8 +184,9 @@ var error = databaseHelper.error;
       var category = function(category,limit,callback) {
           bitcannonTorrentsModel.find({category: category}).limit(limit).sort({'swarm.seeders':-1}).exec(function(err,torrents) {
               if(err) {
-                  callback(err);
-              } else {
+                  error(err);
+              }
+              if(typeof(callback) === 'function') {
                   callback(err,torrents);
               }
           });
@@ -182,9 +195,10 @@ var error = databaseHelper.error;
       var torrent = function(btih,callback) {
           bitcannonTorrentsModel.findOne({_id: btih}).exec(function(err,torrent) {
              if(err) {
-                 callback(err);
-             } else {
-                 callback(err,torrent);
+                 error(err);
+             }
+             if(typeof(callback) === 'function') {
+                 return callback(err,torrent);
              }
           });
       };
@@ -197,6 +211,40 @@ var error = databaseHelper.error;
       };
     };
 
+    //Function to check if a record exists in the database
+    //If a record exists this record is returned to the callback
+    function exists(btih,callback) {
+        bitcannonTorrentsModel.find({_id: btih}).exec(function(err,torrent) {
+            if(err) {
+                error(err);
+            }
+            if(typeof(callback) === 'function') {
+                callback(err,torrent);
+            }
+        });
+    }
+
+    var update = function() {
+
+        //Function to update a record in the database
+        var record = function(id,struct,callback) {
+            bitcannonTorrentsModel.findOneAndUpdate({_id: id},struct,{upsert: false,new:true},function(err,raw) {
+                if(err) {
+                    error(err);
+                }
+                if(typeof(callback) === 'function') {
+                        callback(err,raw);
+                }
+            });
+        };
+
+
+        return {
+            record: record
+        };
+
+    }();
+
     var addTorrent = function(torrent) {
 
     };
@@ -204,6 +252,8 @@ var error = databaseHelper.error;
     return {
         name: 'MongoDB',
         test: test,
-        get: get()
+        exists: exists,
+        get: get(),
+        update: update
     };
 }();

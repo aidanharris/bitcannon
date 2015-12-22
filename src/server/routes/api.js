@@ -71,14 +71,12 @@ router.get('/browse/:category', function(req, res, next) {
                 .replace(new RegExp('"swarm":','g'),'"Swarm":')
                 .replace(new RegExp('"leechers":','g'),'"Leechers":')
                 .replace(new RegExp('"seeders":','g'),'"Seeders":')
-                .replace(new RegExp('"title":','g'),'"Title":'),
-                (function(err,torrents){
-                    if(err) {
-                        res.status(500).send();
-                    } else {
-                        res.json(JSON.parse(torrents));
-                    }
-                })(err,torrents);
+                .replace(new RegExp('"title":','g'),'"Title":');
+                if(err) {
+                    res.status(500).send();
+                } else {
+                    res.json(JSON.parse(torrents));
+                }
         });
     });
 });
@@ -100,25 +98,54 @@ router.get(['/browse/torrent/:btih','/torrent/:btih'], function(req, res, next) 
                 .replace(new RegExp('"swarm":','g'),'"Swarm":')
                 .replace(new RegExp('"leechers":','g'),'"Leechers":')
                 .replace(new RegExp('"seeders":','g'),'"Seeders":')
-                .replace(new RegExp('"title":','g'),'"Title":'),
-                (function(err,torrent){
-                    if(err) {
-                        res.status(500).send();
-                    } else {
-                        res.json(JSON.parse(torrent));
-                    }
-                })(err,torrent);
+                .replace(new RegExp('"title":','g'),'"Title":');
+                if(err) {
+                    return res.status(500).send();
+                } else {
+                    return res.json(JSON.parse(torrent));
+                }
         });
     });
 });
 
 router.get('/scrape/:btih', function(req, res, next) {
     api.unsupported(req, res, next, function() {
-        res.json({
-            "Lastmod": "2015-12-17T01:30:32.185731072Z",
-            "Swarm": {
-                "Leechers": 4,
-                "Seeders": 6
+        //If the id exists, i.e it is in the database
+        bitcannon.database.exists(req.params.btih,function(err,torrent) {
+            if(err) {
+                return res.status(500).send();
+            }
+            if(torrent) {
+                bitcannon.scrape(req.params.btih, function (err, swarm) {
+                    res.json({
+                        "Lastmod": ((torrent[0].swarm.leechers !== swarm.Leechers || torrent[0].swarm.seeders !== swarm.Seeders) ? new Date().toISOString() : torrent[0].lastmod),
+                        "Swarm": {
+                            "Leechers": swarm.Leechers,
+                            "Seeders": swarm.Seeders
+                        }
+                    });
+
+                    var record = torrent[0].toObject();
+                    let recordID = String(torrent[0]._id);
+                    delete record._id;
+
+                    //Modify leechers
+                    if(torrent[0].swarm.leechers !== swarm.Leechers) {
+                        bitcannon.log('Updating Leechers...');
+                        record.swarm.leechers = swarm.Leechers;
+                        record.lastmod = new Date().toISOString();
+                        bitcannon.database.update.record(recordID,record);
+                    }
+                    //Modify seeders
+                    if(torrent[0].swarm.seeders !== swarm.Seeders) {
+                        bitcannon.log('Updating Seeders...');
+                        record.swarm.seeders = swarm.Seeders;
+                        record.lastmod = new Date().toISOString();
+                        bitcannon.database.update.record(recordID,record);
+                    }
+                });
+            } else {
+                return res.status(404).send();
             }
         });
     });
@@ -147,7 +174,5 @@ router.get(/^(.*)$/, function(req, res, next){
         res.status(404).send(); //If the version number is okay we send a 404 Not Found because the resource requested does not exist
     });
 });
-
-
 
 module.exports = router;

@@ -19,6 +19,8 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
-    "nconf": "^0.8.2"
+    "bittorrent-tracker": "^6.3.4",
+    "nconf": "^0.8.2",
+    "parse-torrent": "^5.7.0"
   }
 }
