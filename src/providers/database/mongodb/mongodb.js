@@ -79,6 +79,18 @@ var error = databaseHelper.error;
     //Search methods
     var get = function() {
 
+      //database.get.search
+      var search = function(searchTerm, skip, callback) {
+          bitcannonTorrentsModel.collection.aggregate({$match: {$text: {$search: searchTerm}}},{$sort: {"swarm.seeders": -1}},{"$skip":0},{"$limit":200},function(err,torrents) {
+              if(err) {
+                  error(err);
+              }
+              if(typeof(callback) === 'function') {
+                  return callback(err,torrents);
+              }
+          });
+      };
+
       //database.get.stats
       //Returns the number of torrents in the database in the following format:
       /*
@@ -204,6 +216,7 @@ var error = databaseHelper.error;
       };
 
       return {
+          search: search,
           stats: stats,
           categories: categories,
           category: category,

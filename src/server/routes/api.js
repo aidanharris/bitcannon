@@ -151,12 +151,28 @@ router.get('/scrape/:btih', function(req, res, next) {
     });
 });
 
-router.get('/search/:query', function(req, res, next) {
-
-});
-
-router.get('/search/:query/s/:skip', function(req, res, next) {
-
+router.get(['/search/:query','/search/:query/s/:skip'], function(req, res, next) {
+    req.params.skip = (req.params.skip === undefined) ? 0 : req.params.skip;
+    api.unsupported(req, res, next, function(){
+        bitcannon.database.get.search(req.params.query,req.params.skip,function(err,torrents) {
+           if(err) {
+               res.statusCode(500).send();
+           } else {
+               torrents = JSON.stringify(torrents)
+                   .replace(new RegExp('"_id":','g'),'"Btih":')
+                   .replace(new RegExp('"category":','g'),'"Category":')
+                   .replace(new RegExp('"details":','g'),'"Details":')
+                   .replace(new RegExp('"imported":','g'),'"Imported":')
+                   .replace(new RegExp('"lastmod":','g'),'"Lastmod":')
+                   .replace(new RegExp('"size":','g'),'"Size":')
+                   .replace(new RegExp('"swarm":','g'),'"Swarm":')
+                   .replace(new RegExp('"leechers":','g'),'"Leechers":')
+                   .replace(new RegExp('"seeders":','g'),'"Seeders":')
+                   .replace(new RegExp('"title":','g'),'"Title":');
+               res.json(JSON.parse(torrents));
+           }
+        });
+    });
 });
 
 router.get('/search/:query/c/:category', function(req, res, next) {
