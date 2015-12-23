@@ -290,10 +290,10 @@ module.exports = function (configFile) {
             if (trackers.length <= 0) {
                 client.stop(); //Gracefully leave the swarm
                 if (!callbackCalled) {
+                    callbackCalled = true;
                     log('[OK] Finished Scraping');
                     log('Average number of leechers in swarm: ' + numberOfLeechers);
                     log('Average number of seeders in swarm: ' + numberOfSeeders);
-                    callbackCalled = true;
                     return callback(undefined, {'Leechers': numberOfLeechers, 'Seeders': numberOfSeeders});
                 }
             }
@@ -346,16 +346,56 @@ module.exports = function (configFile) {
     }
 
     function tasks() {
-        for(let i = 0;i < config.archives().length;i++) {
-            console.log('Adding task: ' + config.archives()[i].name);
+        var jobs = [];
+        var archives = [];
+
+        function startup(callback) {
+            if(jobs.length === 0) {
+                //Load modules
+                if(config.archives().length > 0) {
+                    log('Loading archive providers...');
+                    //Require each module
+                    //var module = require('blahblah');
+                    //Push each provider to archives in the following format:
+                    // { "module": module, "frequency": config.archives()[i].frequency }
+                }
+                if(config.feeds().length > 0) {
+
+                }
+            }
+            return callback();
         }
+
+        //Start tasks
+        function start() {
+            startup(function() {
+                if (config.feeds().length > 0) {
+                    for (let i = 0; i < config.feeds().length; i++) {
+                        log('Adding task: ' + config.feeds()[i].url);
+                    }
+                }
+                for (let i = 0; i < config.archives().length; i++) {
+                    log('Adding task: ' + config.archives()[i].name);
+                }
+            });
+        }
+
+        //Stop tasks
+        function stop() {
+
+        }
+
+        return {
+            start: start,
+            stop: stop
+        };
     }
 
     return {
         config: config,
         database: module.exports.database,
         scrape: scrapeTorrent,
-        tasks: tasks,
+        tasks: tasks(),
         exit: exit,
         providers: providers,
         log: log,
