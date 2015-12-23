@@ -1,73 +1,62 @@
 #!/usr/bin/env node
 
-"use strict";
+'use strict';
 
 /**
  * Module dependencies.
  */
 
-var serverDirectory = __dirname + '/src/server';
-var debug = require('./src/server/node_modules/debug');
+const serverDirectory = __dirname + '/src/server';
+let debug = require('./src/server/node_modules/debug');
+let error = require('./src/server/node_modules/debug');
+let app;
+let server;
+let http;
+let port;
+let address;
 
-var bitcannon = require('./src/bitcannon')(__dirname + '/config.json');
+const bitcannon = require('./src/bitcannon')(__dirname + '/config.json');
 
-//To do:
-// * Add more debug levels - At the moment we just have basic error messages, stacktraces and debug output from express
 if (bitcannon.config.debugLevel() > 1) {
-    debug. enable('express:*'); //Detailed output from the express web server
+  debug. enable('express:*'); // Detailed output from the express web server
 }
 
-//Enable debugging for the bitcannon server
+// Enable debugging for the bitcannon server
 debug.enable('bitcannon:server');
+debug.enable('bitcannon:server:error');
 
 debug = debug('bitcannon:server');
+error = error('bitcannon:server:error');
 
-bitcannon.log("Connecting to " + bitcannon.database.name);
+bitcannon.log('Connecting to ' + bitcannon.database.name);
 
-bitcannon.database.test(function(err) {
-    if(err) {
-        bitcannon.error("[ERR] I'm sorry! I Couldn't connect to "+ bitcannon.database.name + ".");
-        bitcannon.error("Please make sure it is installed and running.");
-        bitcannon.exit(1);
-    } else {
-        //Start the task scheduler for archive providers
-        bitcannon.tasks.start();
-    }
+bitcannon.database.test(function (err) {
+  if (err) {
+    bitcannon.error(
+      '[ERR] I\'m sorry! I Couldn\'t connect to ' +
+      bitcannon.database.name +
+      '.'
+    );
+    bitcannon.error('Please make sure it is installed and running.');
+    bitcannon.exit(1);
+  } else {
+    // Start the task scheduler for archive providers
+    bitcannon.tasks.start();
+  }
 });
 
-var app = require(serverDirectory + '/main');
+app = require(serverDirectory + '/main');
 
 app.disable('x-powered-by');
 
-var http = require('http');
-
-/**
- * Get port from environment and store in Express.
- */
-var port = normalizePort(bitcannon.config.bitcannonPort());
-var address = bitcannon.config.bitcannonBindIp();
-app.set('port', port);
-
-/**
- * Create HTTP server.
- */
-
-var server = http.createServer(app);
-
-/**
- * Listen on provided port, on all network interfaces.
- */
-
-server.listen(port,address);
-server.on('error', onError);
-server.on('listening', onListening);
+http = require('http');
 
 /**
  * Normalize a port into a number, string, or false.
  */
 
 function normalizePort(val) {
-  var port = parseInt(val, 10);
+  const port = parseInt(val, 10);
 
   if (isNaN(port)) {
     // named pipe
@@ -83,30 +72,42 @@ function normalizePort(val) {
 }
 
 /**
+ * Get port from environment and store in Express.
+ */
+port = normalizePort(bitcannon.config.bitcannonPort());
+address = bitcannon.config.bitcannonBindIp();
+app.set('port', port);
+
+/**
+ * Create HTTP server.
+ */
+
+server = http.createServer(app);
+
+/**
  * Event listener for HTTP server "error" event.
  */
 
-function onError(error) {
-  if (error.syscall !== 'listen') {
-    throw error;
+function onError(err) {
+  let bind;
+  if (err.syscall !== 'listen') {
+    throw err;
   }
 
-  var bind = typeof port === 'string'
-    ? 'Pipe ' + port
-    : 'Port ' + port;
+  bind = typeof port === 'string' ? 'Pipe ' + port : 'Port ' + port;
 
   // handle specific listen errors with friendly messages
-  switch (error.code) {
+  switch (err.code) {
     case 'EACCES':
-      console.error(bind + ' requires elevated privileges');
-      process.exit(1);
+      error(bind + ' requires elevated privileges');
+      bitcannon.exit(1);
       break;
     case 'EADDRINUSE':
-      console.error(bind + ' is already in use');
-      process.exit(1);
+      error(bind + ' is already in use');
+      bitcannon.exit(1);
       break;
     default:
-      throw error;
+      throw err;
   }
 }
 
@@ -115,10 +116,19 @@ function onError(error) {
  */
 
 function onListening() {
-  var addr = server.address();
-  var bind = typeof addr === 'string'
-    ? 'pipe ' + addr
-    : 'port ' + addr.port;
   debug('Listening on ' + address + ':' + port);
-  debug('[OK!] BitCannon is live at http://' + ((address == '0.0.0.0') ? '127.0.0.1' : address) + ':' + port + '/');
+  debug(
+    '[OK!] BitCannon is live at http://' +
+    ((address === '0.0.0.0') ? '127.0.0.1' : address) +
+    ':' + port + '/'
+  );
 }
+
+
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+
+server.listen(port, address);
+server.on('error', onError);
+server.on('listening', onListening);
