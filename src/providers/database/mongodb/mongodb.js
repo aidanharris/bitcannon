@@ -262,11 +262,17 @@ var error = databaseHelper.error;
 
     };
 
+    var deleteRecord = function(id) {
+
+    };
+
     return {
         name: 'MongoDB',
         test: test,
         exists: exists,
         get: get(),
-        update: update
+        add: addTorrent,
+        update: update,
+        delete: deleteRecord
     };
 }();

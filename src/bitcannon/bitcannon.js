@@ -2,7 +2,11 @@
 
 const Client = require('bittorrent-tracker');
 const parseTorrent = require('parse-torrent');
+
 const fs = require('fs');
+
+const CronJob = require('cron').CronJob;
+
 var nconf = require('nconf');
 
 var debug = require('../server/node_modules/debug');
@@ -341,10 +345,17 @@ module.exports = function (configFile) {
         });
     }
 
+    function tasks() {
+        for(let i = 0;i < config.archives().length;i++) {
+            console.log('Adding task: ' + config.archives()[i].name);
+        }
+    }
+
     return {
         config: config,
         database: module.exports.database,
         scrape: scrapeTorrent,
+        tasks: tasks,
         exit: exit,
         providers: providers,
         log: log,

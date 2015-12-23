@@ -29,6 +29,7 @@ bitcannon.database.test(function(err) {
         bitcannon.exit(1);
     } else {
         //Start the task scheduler for archive providers
+        bitcannon.tasks();
     }
 });
 
