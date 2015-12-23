@@ -27,7 +27,7 @@ router.get('/stats', function (req, res, next) {
     api.unsupported(req, res, next, function () {
         bitcannon.database.get.stats(function(err, count){
             if(err) {
-                res.status(500).send();
+                return res.status(500).type('json').send("{\"error\": \"" + require('statuses')[500] + "\"}");
             } else {
                 res.json({
                     "Count": count,
@@ -42,7 +42,7 @@ router.get('/browse', function (req, res, next) {
     api.unsupported(req, res, next, function () {
         bitcannon.database.get.categories(function(err, categories){
             if(err) {
-                res.status(500).send();
+                return res.status(500).type('json').send("{\"error\": \"" + require('statuses')[500] + "\"}");
             } else {
                 res.json(categories);
             }
@@ -73,7 +73,7 @@ router.get('/browse/:category', function(req, res, next) {
                 .replace(new RegExp('"seeders":','g'),'"Seeders":')
                 .replace(new RegExp('"title":','g'),'"Title":');
                 if(err) {
-                    res.status(500).send();
+                    return res.status(500).type('json').send("{\"error\": \"" + require('statuses')[500] + "\"}");
                 } else {
                     res.json(JSON.parse(torrents));
                 }
@@ -100,7 +100,7 @@ router.get(['/browse/torrent/:btih','/torrent/:btih'], function(req, res, next) 
                 .replace(new RegExp('"seeders":','g'),'"Seeders":')
                 .replace(new RegExp('"title":','g'),'"Title":');
                 if(err) {
-                    return res.status(500).send();
+                    return res.status(500).type('json').send("{\"error\": \"" + require('statuses')[500] + "\"}");
                 } else {
                     return res.json(JSON.parse(torrent));
                 }
@@ -113,7 +113,7 @@ router.get('/scrape/:btih', function(req, res, next) {
         //If the id exists, i.e it is in the database
         bitcannon.database.exists(req.params.btih,function(err,torrent) {
             if(err) {
-                return res.status(500).send();
+                return res.status(500).type('json').send("{\"error\": \"" + require('statuses')[500] + "\"}");
             }
             if(torrent) {
                 bitcannon.scrape(req.params.btih, function (err, swarm) {
@@ -145,7 +145,7 @@ router.get('/scrape/:btih', function(req, res, next) {
                     }
                 });
             } else {
-                return res.status(404).send();
+                return res.status(404).type('json').send("{\"error\": \"" + require('statuses')[404] + "\"}");
             }
         });
     });
@@ -156,7 +156,7 @@ router.get(['/search/:query','/search/:query/s/:skip','/search/:query/c/:categor
     api.unsupported(req, res, next, function(){
         bitcannon.database.get.search(req.params.query,req.params.category,req.params.skip,function(err,torrents) {
            if(err) {
-               res.status(500).send();
+               return res.status(500).type('json').send("{\"error\": \"" + require('statuses')[500] + "\"}");
            } else {
                if(torrents.length === 0) {
                    return res.status(404).type('json').send("{\"error\": \"" + "No results found for " + req.params.query + "\"}");
@@ -182,7 +182,7 @@ router.get(['/search/:query','/search/:query/s/:skip','/search/:query/c/:categor
 router.get(/^(.*)$/, function(req, res, next){
     //All routers must call api.unsupported with a callback function in order to verify if the API version trying to be used is valid
     api.unsupported(req, res, next, function() {
-        return res.status(404).type('json').send("{\"error\": \"" + require('../statuses')[404] + "\"}"); //If the version number is okay we send a 404 Not Found because the resource requested does not exist
+        return res.status(400).type('json').send("{\"error\": \"" + require('statuses')[400] + "\"}"); //If the version number is okay we send a 400 'Bad Request' because the request is malformed
     });
 });
 
