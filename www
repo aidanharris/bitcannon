@@ -17,7 +17,7 @@ let address;
 
 const bitcannon = require('./src/bitcannon')(__dirname + '/config.json');
 
-if (bitcannon.config.debugLevel() > 1) {
+if (bitcannon.config.debugLevel() > 2) {
   debug. enable('express:*'); // Detailed output from the express web server
 }
 

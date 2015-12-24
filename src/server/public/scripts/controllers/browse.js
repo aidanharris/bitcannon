@@ -12,6 +12,6 @@ angular.module('bitCannonApp')
     $scope.awesomeThings = [
       'HTML5 Boilerplate',
       'AngularJS',
-      'Karma'
+      'Karma',
     ];
   });

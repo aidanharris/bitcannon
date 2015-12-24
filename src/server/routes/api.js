@@ -114,15 +114,21 @@ router.get('/scrape/:btih', function (req, res, next) {
       }
       if (torrent) {
         bitcannon.scrape(req.params.btih, function (err, swarm) {
-          /* jshint ignore:start,-W101*/
+          // Handle an outright failure to scrape any trackers
+          if (swarm.Seeders === -1 && swarm.Leechers === -1) {
+            return res.status(500).type('json')
+              .send('{"error": "' + require('statuses')[500] + '"}');
+          }
           res.json({
-            'Lastmod': (torrent[0].swarm.leechers !== swarm.Leechers || torrent[0].swarm.seeders !== swarm.Seeders) ? new Date().toISOString() : torrent[0].lastmod,
+            'Lastmod': (
+            torrent[0].swarm.leechers !== swarm.Leechers ||
+            torrent[0].swarm.seeders !== swarm.Seeders
+            ) ? new Date().toISOString() : torrent[0].lastmod,
             'Swarm': {
               'Leechers': swarm.Leechers,
               'Seeders': swarm.Seeders,
             },
           });
-          /* jshint ignore:end,+W101*/
 
           record = torrent[0].toObject();
           recordID = String(torrent[0]._id);
