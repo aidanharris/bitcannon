@@ -134,15 +134,12 @@ router.get('/scrape/:btih', function (req, res, next) {
           recordID = String(torrent[0]._id);
           delete record._id;
 
-          // Modify leechers
-          if (torrent[0].swarm.leechers !== swarm.Leechers) {
+          // Modify leechers and seeders
+          if (
+            torrent[0].swarm.leechers !== swarm.Leechers ||
+            torrent[0].swarm.seeders !== swarm.Seeders) {
             bitcannon.log('Updating Leechers...');
             record.swarm.leechers = swarm.Leechers;
-            record.lastmod = new Date().toISOString();
-            bitcannon.database.update.record(recordID, record);
-          }
-          // Modify seeders
-          if (torrent[0].swarm.seeders !== swarm.Seeders) {
             bitcannon.log('Updating Seeders...');
             record.swarm.seeders = swarm.Seeders;
             record.lastmod = new Date().toISOString();
