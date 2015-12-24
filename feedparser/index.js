@@ -26,6 +26,17 @@ function parse(err, body) {
     let xmlns = '';
     let torrentTag = false;
     let torrentNameSpace = false;
+    let namespace = '';
+    let torrent;
+    const torrentTags = [
+      'contentLength',
+      'infoHash',
+      'magnetURI',
+      'seeds',
+      'peers',
+      'verified',
+      'fileName',
+    ];
     if (err) {
       bitcannon.error(err);
       throw err;
@@ -52,19 +63,37 @@ function parse(err, body) {
         //    />
         //    ...
         // </rss>
-        xmlns = result.rss.$['xmlns:atom'];
+        try {
+          xmlns = result.rss.$['xmlns:atom'];
+        } catch (err) {
+          bitcannon.error(err);
+          throw err;
+        }
       }
     }
     if (torrentNameSpace || torrentTag) {
-      console.log(result.rss.channel[0]);
-      console.log('xmlns: ' + xmlns);
-      console.log(result.rss.channel[0].item.length);
+      if (torrentNameSpace) {
+        namespace = 'torrent:';
+        torrent = result.rss.channel[0].item;
+      } else {
+        torrent = result.rss.channel[0].torrent;
+      }
+      for (let i = 0; i < result.rss.channel[0].item.length; i++) {
+        for (let j = 0; j < torrentTags.length; j++) {
+          console.log(namespace + torrentTags[j] + ': ' +
+            torrent[i][namespace + torrentTags[j]]);
+        }
+      }
+    } else {
+      console.log(xmlns);
     }
   });
 }
 
+// Set RSS feed using export RSS=''
+// or RSS='' node index.js
 request({
-  'uri': 'http://127.0.0.1:8000/rss.xml',
+  'uri': process.env.RSS,
   'headers': {
     'User-Agent': 'BitCannon (http://bitcannon.io)',
     'Accept-Encoding': 'gzip',
