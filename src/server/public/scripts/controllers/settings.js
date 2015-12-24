@@ -12,16 +12,16 @@ angular.module('bitCannonApp')
     $scope.awesomeThings = [
       'HTML5 Boilerplate',
       'AngularJS',
-      'Karma'
+      'Karma',
     ];
-    $scope.saveAPI = function() {
+    $scope.saveAPI = function () {
       $rootScope.api = $scope.apiBox;
       $window.localStorage.api = $rootScope.api;
     };
-    $scope.clearAPIBox = function() {
+    $scope.clearAPIBox = function () {
       $scope.apiBox = $rootScope.api;
     };
-    $scope.resetAPI = function() {
+    $scope.resetAPI = function () {
       delete $window.localStorage.api;
       $rootScope.api = '';// Old default http://localhost:1337
       $scope.apiBox = $rootScope.api;
