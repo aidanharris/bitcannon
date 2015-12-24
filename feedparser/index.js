@@ -72,7 +72,6 @@ request({
   'encoding': null,
   'method': 'GET',
   'timeout': 10000,
-  'followRedirect': false,
   'maxRedirects': 10,
   'removeRefererHeader': true,
 }, function (error, response, body) {
