@@ -1,8 +1,10 @@
 'use strict';
 
-const bitcannon = require('../src/bitcannon')();
+const bitcannon = require('../src/bitcannon')('../config.json');
 
 const parseString = require('xml2js').parseString;
+
+const parseTorrent = require('../src/bitcannon/node_modules/parse-torrent');
 
 const request = require('request');
 // require('request-debug')(request);
@@ -21,13 +23,38 @@ function gunzip(body, callback) {
   });
 }
 
-function parse(err, body) {
+function parse(err, body, callback) {
+  function getTorrentInfo(url, struct) {
+    if (url.indexOf('http') === 0) {
+      parseTorrent.remote(url,
+        function (err, parsedTorrent) {
+          if (err) {
+            console.warn(err);
+            throw err;
+          }
+          struct._id = parsedTorrent.infoHash.toUpperCase();
+          return bitcannon.scrape(struct._id, function (err, swarm) {
+            struct.swarm.leechers = swarm.Leechers;
+            struct.swarm.seeders = swarm.Seeders;
+            return callback(err, struct);
+          });
+        }
+      );
+    } else {
+      return bitcannon.scrape(struct._id, function (err, swarm) {
+        struct.swarm.leechers = swarm.Leechers;
+        struct.swarm.seeders = swarm.Seeders;
+        return callback(err, struct);
+      });
+    }
+  }
   parseString(body, function (err, result) {
     let xmlns = '';
     let torrentTag = false;
     let torrentNameSpace = false;
     let namespace = '';
     let torrent;
+    let item;
     const torrentTags = [
       'contentLength',
       'infoHash',
@@ -75,12 +102,13 @@ function parse(err, body) {
         torrent = result.rss.channel[0].item;
       } else {
         torrent = result.rss.channel[0].torrent;
+        item = result.rss.channel[0].item;
       }
       for (let i = 0, struct = bitcannon.providers.torrentStruct();
         i < result.rss.channel[0].item.length; i++) {
-        struct.category = torrent[i].category;
-        struct.title = torrent[i].title;
-        struct.details = torrent[i].guid;
+        struct.category = torrent[i].category || item[i].category;
+        struct.title = torrent[i].title || item[i].title;
+        struct.details = torrent[i].guid || item[i].guid;
         for (let j = 0; j < torrentTags.length; j++) {
           switch (torrentTags[j]) {
             case 'seeds':
@@ -108,10 +136,27 @@ function parse(err, body) {
             torrent[i][namespace + torrentTags[j]]);
           */
         }
-        /*
-        console.log('enclosure: ' + torrent[i].enclosure[0].$.url);
-        */
-        console.log(struct);
+        if (typeof(struct._id) === 'undefined') {
+          if (
+            torrent[i].enclosure[0].$.url
+              .substring(
+                (torrent[i].enclosure[0].$.url.length - 8)
+              ) === '.torrent'
+          ) {
+            // Always pass a copy of struct to getTorrentInfo, not a reference.
+            // Using a reference (which is the default behaviour) causes values
+            // to change within the function because of the loop.
+            getTorrentInfo(
+              torrent[i].enclosure[0].$.url,
+              JSON.parse(JSON.stringify(struct))
+            );
+          }
+        } else {
+          getTorrentInfo(
+            String(struct._id),
+            JSON.parse(JSON.stringify(struct))
+          );
+        }
       }
     } else {
       console.log(xmlns);
@@ -133,6 +178,9 @@ request({
   'maxRedirects': 10,
   'removeRefererHeader': true,
 }, function (error, response, body) {
+  let callback = function(err, struct) {
+    console.log(struct);
+  };
   if (error) {
     bitcannon.error(error);
     throw error;
@@ -140,11 +188,11 @@ request({
   switch (response.headers['content-encoding']) {
     case 'gzip':
       gunzip(body, function (err, body) {
-        parse(err, body);
+        parse(err, body, callback);
       });
       break;
     default:
-      parse(undefined, body);
+      parse(undefined, body, callback);
       break;
   }
 });
