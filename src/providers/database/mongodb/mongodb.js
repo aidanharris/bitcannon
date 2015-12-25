@@ -1,32 +1,35 @@
-"use strict";
+'use strict';
 
-var bitcannon = require('../../../bitcannon')();
-var mongoose = require('mongoose');
+const bitcannon = require('../../../bitcannon')();
+const mongoose = require('mongoose');
 
-var Schema = mongoose.Schema;
+const Schema = mongoose.Schema;
 
-var mongodb = module.exports = function () {
+module.exports = (function () {
+// Database helper functions from bitcannon.providers.database
+  const databaseHelper = bitcannon.providers.database('mongodb');
+  const log = databaseHelper.log;
+  const error = databaseHelper.error;
 
-//Database helper functions from bitcannon.providers.database
-  var databaseHelper = bitcannon.providers.database('mongodb');
-  var log = databaseHelper.log;
-  var error = databaseHelper.error;
+  // Bitcannon Database Structure
+  const bitcannonTorrentSchema = new Schema(databaseHelper.schema);
 
-  //Bitcannon Database Structure
-  var bitcannonTorrentSchema = new Schema(databaseHelper.schema);
+  const bitcannonTorrentsModel = mongoose.model(
+    'torrents',
+    bitcannonTorrentSchema
+  );
 
-  var bitcannonTorrentsModel = mongoose.model('torrents', bitcannonTorrentSchema);
-
-  //To Do
+  // To Do
   // * Make this dynamic instead of hardcoded
-  var dbURI = 'mongodb://localhost/bitcannon';
+  const dbURI = 'mongodb://localhost/bitcannon';
 
-  var open = function (callback) {
-    //If we are already connected we don't need to open another connection
-    //Doing so would cause an error
+  const open = function (callback) {
+    let db;
+    // If we are already connected we don't need to open another connection
+    // Doing so would cause an error
     if (mongoose.connection.readyState !== 1) {
       mongoose.connect(dbURI);
-      var db = mongoose.connection;
+      db = mongoose.connection;
 
       // CONNECTION EVENTS
       // When successfully connected
@@ -43,14 +46,14 @@ var mongodb = module.exports = function () {
         }
       });
     } else {
-      //We have a connection so trigger the callback
+      // We have a connection so trigger the callback
       if (typeof(callback) === 'function') {
         return callback();
       }
     }
   };
 
-  var close = function (callback) {
+  const close = function (callback) {
     mongoose.connection.close(function () {
       if (typeof(callback) === 'function') {
         return callback();
@@ -58,10 +61,10 @@ var mongodb = module.exports = function () {
     });
   };
 
-  //Public function that tests connecting to the database
-  var test = function (callback) {
+  // Public function that tests connecting to the database
+  const test = function (callback) {
     // Create the database connection
-    var conn = open(function (err) {
+    open(function (err) {
       if (err) {
         error(err.message);
         if (bitcannon.config.debugLevel() > 0) {
@@ -76,30 +79,41 @@ var mongodb = module.exports = function () {
     });
   };
 
-  //Search methods
-  var get = function () {
-
-    //database.get.search
-    var search = function (searchTerm, category, skip, callback) {
-      bitcannonTorrentsModel.collection.aggregate({$match: {$text: {$search: searchTerm}}}, ((category === undefined) ? {$match: {category: /^(.*)$/}} : {$match: {category: category}}), {$sort: {"swarm.seeders": -1}}, {"$skip": skip}, {"$limit": 200}, function (err, torrents) {
-        if (err) {
-          error(err);
-        }
-        if (typeof(callback) === 'function') {
-          return callback(err, torrents);
-        }
-      });
+  // Search methods
+  const get = function () {
+    // database.get.search
+    const search = function (searchTerm, category, skip, callback) {
+      // .replace(new RegExp('\\*', 'g'), '/^(.*)$/')
+      bitcannonTorrentsModel.collection
+        .aggregate({ $match: { $text: { $search: searchTerm } } },
+          (
+            (typeof(category) === 'undefined') ?
+            { $match: { category: /^(.*)$/ } } :
+            { $match: { category } }
+          ),
+          { $sort: { 'swarm.seeders': -1 } },
+          { '$skip': skip },
+          { '$limit': 200 },
+          function (err, torrents) {
+            if (err) {
+              error(err);
+            }
+            if (typeof(callback) === 'function') {
+              return callback(err, torrents);
+            }
+          }
+        );
     };
 
-    //database.get.stats
-    //Returns the number of torrents in the database in the following format:
+    // database.get.stats
+    // Returns the number of torrents in the database in the following format:
     /*
      Count: Total number of torrents in the database
      {
      "Count": 11019460,
      }
      */
-    var stats = function (callback) {
+    const stats = function (callback) {
       bitcannonTorrentsModel.collection.stats(function (err, torrents) {
         if (err) {
           error(err);
@@ -114,58 +128,65 @@ var mongodb = module.exports = function () {
       });
     };
 
-    //database.get.categories
-    //Returns a list of all categories in the database as an array of JSON objects in the following format:
+    // database.get.categories
+    // Returns a list of all categories in the database as an array of
+    // JSON objects in the following format:
     /*
      count: Amount of torrents in category
      name: Name of the category
      [{"count": 247869,"name": "Movies"}]
      */
-    var categories = function (callback) {
-      //Get all categories
-      bitcannonTorrentsModel.collection.distinct('category', function (err, categories) {
-        if (err) {
-          error(err);
-          if (typeof(callback) === 'function') {
-            return callback(err);
-          }
-        }
-        let categoriesJSON = [];
-        let categoriesLength = categories.length;
-        for (var i = 0; i < categoriesLength; i++) {
-          categoriesJSON.push(
-            {
-              count: -1,
-              name: categories.pop()
+    const categories = function (callback) {
+      // Get all categories
+      bitcannonTorrentsModel.collection.distinct('category',
+        function (err, categories) {
+          if (err) {
+            error(err);
+            if (typeof(callback) === 'function') {
+              return callback(err);
             }
-          );
-          //Keep track of the number of completed async operations
-          //Because Node.js is asynchronous this is necessary since
-          //the function below will fire at different times for each index i
-          var asyncOperations = 0;
-          //jshint loopfunc: true
+          }
+          // Keep track of the number of completed async operations
+          // Because Node.js is asynchronous this is necessary since
+          // the function below (getCategoryCount) will fire at
+          // different times for each index i
+          let asyncOperations = 0;
+          let categoriesJSON;
+          categoriesJSON = [];
+          const categoriesLength = categories.length;
           const getCategoryCount = function (i, callback) {
-            bitcannonTorrentsModel.count({category: categoriesJSON[i].name}, function (err, count) {
-              if (err) {
-                error(err);
-                return callback(err);
-              }
-              categoriesJSON[i].count = count;
-              asyncOperations++;
-              if (asyncOperations === categoriesLength) {
-                if (typeof(callback) === 'function') {
-                  return callback(err, categoriesJSON.reverse());
+            bitcannonTorrentsModel.count({ category: categoriesJSON[i].name },
+              function (err, count) {
+                if (err) {
+                  error(err);
+                  return callback(err);
+                }
+                categoriesJSON[i].count = count;
+                asyncOperations++;
+                if (asyncOperations === categoriesLength) {
+                  if (typeof(callback) === 'function') {
+                    return callback(err, categoriesJSON.reverse());
+                  }
                 }
               }
-            });
-          }(i, callback);
+            );
+          };
+          for (let i = 0; i < categoriesLength; i++) {
+            categoriesJSON.push(
+              {
+                count: -1,
+                name: categories.pop(),
+              }
+            );
+            getCategoryCount(i, callback);
+          }
         }
-      });
+      );
     };
 
-    //database.get.category
-    //Returns a list of all torrents in a category in the following format:
-    //To Do - Extend this to return X results instead of all of them.
+    // database.get.category
+    // Returns a list of all torrents in a category in the following format:
+    // To Do - Extend this to return X results instead of all of them.
     /*
      Btih: Bitorrent Info Hash (https://en.wikipedia.org/wiki/Magnet_URI_scheme)
      Category: The category the torrent is in
@@ -173,7 +194,8 @@ var mongodb = module.exports = function () {
      Imported: Date torrent was added to the database
      Lastmod: The date the torrent was last modified in the database
      Size: The size of the files downloadable via the torrent?
-     Swarm: A JSON object containing information regarding the Bittorrent swarm the torrent is in
+     Swarm: A JSON object containing information regarding the
+      Bittorrent swarm the torrent is in
      Swarm.Leechers: The number of leechers in the swarm
      Swarm.Seeders: The number of seeders in the swarm
      Title: The title of the torrent
@@ -194,8 +216,7 @@ var mongodb = module.exports = function () {
      }]
      */
     const category = function (category, limit, callback) {
-      /* eslint-disable object-shorthand */
-      bitcannonTorrentsModel.find({ 'category': category })
+      bitcannonTorrentsModel.find({ category })
         .limit(limit)
         .sort({ 'swarm.seeders': -1 })
         .exec(function (err, torrents) {
@@ -206,7 +227,6 @@ var mongodb = module.exports = function () {
             callback(err, torrents);
           }
         });
-      /* eslint-enable object-shorthand */
     };
 
     const torrent = function (btih, callback) {
@@ -274,6 +294,8 @@ var mongodb = module.exports = function () {
 
   return {
     name: 'MongoDB',
+    open,
+    close,
     test,
     exists,
     get: get(),
@@ -281,4 +303,4 @@ var mongodb = module.exports = function () {
     update: update(),
     delete: deleteRecord,
   };
-}();
+})();

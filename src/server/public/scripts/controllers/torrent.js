@@ -45,8 +45,7 @@ angular.module('bitCannonApp')
             $scope.refreshing = false;
             $scope.torrent.Swarm = data.Swarm;
             $scope.torrent.Lastmod = data.Lastmod;
-          }
-          else {
+          } else {
             $scope.refreshing = false;
             $rootScope.message = data.message;
           }

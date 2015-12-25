@@ -31,12 +31,10 @@ function parse(err, body) {
     const torrentTags = [
       'contentLength',
       'infoHash',
-      'magnetURI',
       'seeds',
       'peers',
-      'verified',
-      'fileName',
     ];
+
     if (err) {
       bitcannon.error(err);
       throw err;
@@ -78,11 +76,42 @@ function parse(err, body) {
       } else {
         torrent = result.rss.channel[0].torrent;
       }
-      for (let i = 0; i < result.rss.channel[0].item.length; i++) {
+      for (let i = 0, struct = bitcannon.providers.torrentStruct();
+        i < result.rss.channel[0].item.length; i++) {
+        struct.category = torrent[i].category;
+        struct.title = torrent[i].title;
+        struct.details = torrent[i].guid;
         for (let j = 0; j < torrentTags.length; j++) {
+          switch (torrentTags[j]) {
+            case 'seeds':
+              struct.swarm.seeders =
+                (typeof(torrent[i][namespace + torrentTags[j]]) ===
+                'undefined') ? 0 : torrent[i][namespace + torrentTags[j]];
+              break;
+            case 'peers':
+              struct.swarm.leechers =
+                (typeof(torrent[i][namespace + torrentTags[j]]) ===
+              'undefined') ? 0 : torrent[i][namespace + torrentTags[j]];
+              break;
+            case 'infoHash':
+              struct._id = torrent[i][namespace + torrentTags[j]];
+              break;
+            case 'contentLength':
+              struct.size = torrent[i][namespace + torrentTags[j]];
+              break;
+            default:
+              struct[namespace + torrentTags[j]] =
+                torrent[i][namespace + torrentTags[j]];
+          }
+          /*
           console.log(namespace + torrentTags[j] + ': ' +
             torrent[i][namespace + torrentTags[j]]);
+          */
         }
+        /*
+        console.log('enclosure: ' + torrent[i].enclosure[0].$.url);
+        */
+        console.log(struct);
       }
     } else {
       console.log(xmlns);

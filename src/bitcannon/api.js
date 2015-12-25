@@ -19,18 +19,17 @@ module.exports = (function () {
       // If it's less than or equal to legacyVersions we send a HTTP 410 'Gone'
       // error along with a message explaining that a deprecated API is used
       if (req.apiVersion <= legacyVersions) {
-        return res.status(410).send({
+        return res.status(410).type('json').json({
           'error':
           'You are trying to use a deprecated version of the BitCannon API!' +
           ' Please upgrade to the latest version ' +
           '(see https://github.com/aidanharris/bitcannon/wiki/API)' });
       }
-      // If it's greater than the current api version we send a HTTP 400 'Bad Request' error because the API version does not exist
+      // If it's greater than the current api version we send a HTTP 400
+      // 'Bad Request' error because the API version does not exist
       if (req.apiVersion > latestApi) {
         return res.status(400).type('json')
-          .send('{"error": "' +
-            require('../server/node_modules/statuses')[400] +
-            '"}');
+          .json({ error: require('../server/node_modules/statuses')[400] });
       }
       // Else everything is fine so we run the callback function
       return callback(req, res, next);
