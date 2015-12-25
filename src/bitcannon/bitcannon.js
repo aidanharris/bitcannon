@@ -238,6 +238,35 @@ module.exports = function (configFile) {
   });
 
   const providers = (function () {
+    // Database schema - All database providers must implement this
+    const schema = {
+      _id: String,
+      title: String,
+      category: String,
+      size: Number,
+      details: Array,
+      swarm: {
+        seeders: Number,
+        leechers: Number,
+      },
+      lastmod: Date,
+      imported: Date,
+    };
+    const torrentStruct = function () {
+      return {
+        _id: schema._id,
+        title: schema.title,
+        category: schema.category,
+        size: schema.size,
+        details: schema.details,
+        swarm: {
+          seeders: schema.swarm.seeders,
+          leechers: schema.swarm.leechers,
+        },
+        lastmod: schema.lastmod,
+        imported: schema.imported,
+      };
+    };
     function logFn(provider) {
       // Bind log to console.log
       const log = debug('bitcannon:providers' + provider);
@@ -279,31 +308,17 @@ module.exports = function (configFile) {
     const database = function (provider) {
       const logger = logging('database', provider);
 
-      // Database schema - All database providers must implement this
-      const schema = {
-        _id: String,
-        title: String,
-        category: String,
-        size: Number,
-        details: Array,
-        swarm: {
-          seeders: Number,
-          leechers: Number,
-        },
-        lastmod: Date,
-        imported: Date,
-      };
-
       return {
         log: logger.log,
         error: logger.error,
-        schema,
+        schema: torrentStruct(),
       };
     };
 
     return {
       archives,
       database,
+      torrentStruct,
     };
   })();
 

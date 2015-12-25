@@ -16,7 +16,7 @@ router.get('/stats', function (req, res, next) {
     bitcannon.database.get.stats(function (err, count) {
       if (err) {
         return res.status(500).type('json')
-          .send('{"error": "' + require('statuses')[500] + '"}');
+          .json({ error: require('statuses')[500] });
       }
       res.json({
         'Count': count,
@@ -31,7 +31,7 @@ router.get('/browse', function (req, res, next) {
     bitcannon.database.get.categories(function (err, categories) {
       if (err) {
         return res.status(500).type('json')
-          .send('{"error": "' + require('statuses')[500] + '"}');
+          .json({ error: require('statuses')[500] });
       }
       res.json(categories);
     });
@@ -65,7 +65,7 @@ router.get('/browse/:category', function (req, res, next) {
           .replace(new RegExp('"title":', 'g'), '"Title":');
         if (err) {
           return res.status(500).type('json')
-            .send('{"error": "' + require('statuses')[500] + '"}');
+            .json({ error: require('statuses')[500] });
         }
         res.json(JSON.parse(torrentsJSON));
       });
@@ -93,7 +93,7 @@ router.get(['/browse/torrent/:btih', '/torrent/:btih'],
           .replace(new RegExp('"title":', 'g'), '"Title":');
         if (err) {
           return res.status(500).type('json')
-            .send('{"error": "' + require('statuses')[500] + '"}');
+            .json({ error: require('statuses')[500] });
         }
         return res.json(JSON.parse(torrentJSON));
       });
@@ -110,14 +110,14 @@ router.get('/scrape/:btih', function (req, res, next) {
 
       if (err) {
         return res.status(500).type('json')
-          .send('{"error": "' + require('statuses')[500] + '"}');
+          .json({ error: require('statuses')[500] });
       }
       if (torrent) {
         bitcannon.scrape(req.params.btih, function (err, swarm) {
           // Handle an outright failure to scrape any trackers
           if (swarm.Seeders === -1 && swarm.Leechers === -1) {
             return res.status(500).type('json')
-              .send('{"error": "' + require('statuses')[500] + '"}');
+              .json({ error: require('statuses')[500] });
           }
           res.json({
             'Lastmod': (
@@ -134,15 +134,12 @@ router.get('/scrape/:btih', function (req, res, next) {
           recordID = String(torrent[0]._id);
           delete record._id;
 
-          // Modify leechers
-          if (torrent[0].swarm.leechers !== swarm.Leechers) {
+          // Modify leechers and seeders
+          if (
+            torrent[0].swarm.leechers !== swarm.Leechers ||
+            torrent[0].swarm.seeders !== swarm.Seeders) {
             bitcannon.log('Updating Leechers...');
             record.swarm.leechers = swarm.Leechers;
-            record.lastmod = new Date().toISOString();
-            bitcannon.database.update.record(recordID, record);
-          }
-          // Modify seeders
-          if (torrent[0].swarm.seeders !== swarm.Seeders) {
             bitcannon.log('Updating Seeders...');
             record.swarm.seeders = swarm.Seeders;
             record.lastmod = new Date().toISOString();
@@ -151,7 +148,7 @@ router.get('/scrape/:btih', function (req, res, next) {
         });
       } else {
         return res.status(404).type('json')
-          .send('{"error": "' + require('statuses')[404] + '"}');
+          .json({ error: require('statuses')[404] });
       }
     });
   });
@@ -174,12 +171,12 @@ router.get(
         function (err, torrents) {
           if (err) {
             return res.status(500).type('json')
-              .send('{"error": "' + require('statuses')[500] + '"}');
+              .json({ error: require('statuses')[500] });
           }
           if (torrents.length === 0) {
             return res.status(404).type('json')
-              .send('{"error": "' +
-                'No results found for ' + req.params.query + '"}');
+              .json({ error: 'No results found for ' +
+                req.params.query });
           }
           const torrentsJSON = JSON.stringify(torrents)
             .replace(new RegExp('"_id":', 'g'), '"Btih":')
@@ -207,7 +204,7 @@ router.get(/^(.*)$/, function (req, res, next) {
     // If the version number is okay we send a 400 'Bad Request'
     // because the request is malformed.
     return res.status(400).type('json')
-      .send('{"error": "' + require('statuses')[400] + '"}');
+      .json({ error: require('statuses')[400] });
   });
 });
 
