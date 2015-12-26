@@ -1,0 +1,16 @@
+{
+  "name": "bitcannon-torrent-rss-feed-parser",
+  "version": "1.0.0",
+  "description": "The module used by bitcannon to parse torrent RSS feeds",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Aidan Harris",
+  "license": "MIT",
+  "dependencies": {
+    "request": "^2.67.0",
+    "request-debug": "^0.2.0",
+    "xml2js": "^0.4.15"
+  }
+}

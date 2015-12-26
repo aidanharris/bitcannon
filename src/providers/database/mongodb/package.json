@@ -1,5 +1,5 @@
 {
-  "name": "mongodb",
+  "name": "bitcannon-mongodb",
   "version": "1.0.0",
   "description": "A mongodb database provider for BitCannon",
   "main": "mongodb.js",
