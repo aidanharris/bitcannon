@@ -466,6 +466,9 @@ module.exports = function (configFile) {
                 function (err, torrent) {
                   try {
                     if (torrent.length === 0) {
+                      struct.lastmod = new Date().toISOString();
+                      struct.imported = struct.lastmod;
+                      struct.size = struct.size || 0;
                       module.exports.database.add(struct, function () {
                         log('Added ' + struct.title + ' to the database.');
                       });

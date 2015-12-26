@@ -15,6 +15,16 @@ angular.module('bitCannonApp')
         success(function (data, status) {
           if (status === 200) {
             $scope.torrent = data;
+            $scope.torrent.Size = $scope.torrent.Size / 1048576;
+            if ($scope.torrent.Size > 1024) {
+              $scope.torrent.Size = String(
+                ($scope.torrent.Size / 1024).toFixed(2) +
+                ' gigabytes');
+            } else {
+              $scope.torrent.Size = String(
+                ($scope.torrent.Size).toFixed(2) +
+                ' megabytes');
+            }
           } else {
             $rootScope.message = data.message;
           }
