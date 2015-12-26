@@ -5,6 +5,8 @@ const parseTorrent = require('parse-torrent');
 
 const fs = require('fs');
 
+const rss = require('../providers/rss');
+
 const CronJob = require('cron').CronJob;
 
 const nconf = require('nconf');
@@ -26,10 +28,12 @@ module.exports = function (configFile) {
   nconf.use('memory');
 
   const config = (function () {
-    // Shortcuts to nconf.get so we can get the value of something via config.value()
+    // Shortcuts to nconf.get so we can get the value of something
+    // via config.value()
     /*
      To DO
-     * Make this less DRY (https://en.wikipedia.org/wiki/Don%27t_repeat_yourself)
+     * Make this less DRY
+     * (https://en.wikipedia.org/wiki/Don%27t_repeat_yourself)
      */
     function bitcannonPort() {
       return nconf.get('bitcannonPort');
@@ -350,9 +354,11 @@ module.exports = function (configFile) {
         client.stop(); // Gracefully leave the swarm
         if (!callbackCalled) {
           callbackCalled = true;
-          log('[OK] Finished Scraping');
-          log('Average number of leechers in swarm: ' + numberOfLeechers);
-          log('Average number of seeders in swarm: ' + numberOfSeeders);
+          if (config.debugLevel() > 1) {
+            log('[OK] Finished Scraping ' + parsedTorrent.infoHash);
+          }
+          // log('Average number of leechers in swarm: ' + numberOfLeechers);
+          // log('Average number of seeders in swarm: ' + numberOfSeeders);
           if (successfulScrapes > 0) {
             return callback(err, {
               'Leechers': numberOfLeechers,
@@ -394,12 +400,10 @@ module.exports = function (configFile) {
     // scrape
     client.scrape();
 
-    log('Scraping torrent ' + ' with infohash ' + parsedTorrent.infoHash);
-    log('Using magnet: ' + magnet);
+    //log('Scraping torrent ' + ' with infohash ' + parsedTorrent.infoHash);
     client.on('scrape', function (data) {
       trackers.pop();
       successfulScrapes++; // Increment the number of successful scrapes
-      log('got a scrape response from tracker: ' + data.announce);
 
       // Gets an average parsed as an integer (you can't have half a seeder)
       numberOfSeeders = parseInt(
@@ -409,16 +413,19 @@ module.exports = function (configFile) {
         (numberOfLeechers + data.incomplete) / (successfulScrapes), 10
       );
 
-      log('number of seeders in the swarm: ' + data.complete);
-      log('number of leechers in the swarm: ' + data.incomplete);
-
       return callCallback();
     });
   }
 
   function tasks() {
+    // All scheduled tasks will be pushed to this array
     let jobs = [];
+    // All archive providers will be stored here before
+    // being pushed to the jobs array
     let archives = [];
+    // All feeds will be stored here before being pushed
+    // to the jobs array.
+    let feeds = [];
 
     function startup(callback) {
       if (jobs.length === 0) {
@@ -431,7 +438,7 @@ module.exports = function (configFile) {
           // { "module": module, "frequency": config.archives()[i].frequency }
         }
         if (config.feeds().length > 0) {
-
+          log('Scheduling RSS feeds to parse...');
         }
       }
       return callback();
@@ -440,15 +447,29 @@ module.exports = function (configFile) {
     // Start tasks
     function start() {
       startup(function () {
-        if (config.feeds().length > 0) {
-          for (let i = 0; i < config.feeds().length; i++) {
-            log('Adding task: ' + config.feeds()[i].url);
+        if (config.archives().length > 0) {
+          for (let i = 0; i < config.archives().length; i++) {
+            log('Adding task: ' + config.archives()[i].name);
           }
         }
-        for (let i = 0; i < config.archives().length; i++) {
-          log('Adding task: ' + config.archives()[i].name);
+        for (let i = 0; i < config.feeds().length; i++) {
+          log('Adding task: ' + config.feeds()[i].url);
+          /* eslint-disable no-loop-func */
+          /* jshint -W083 */
+          rss(
+            String(config.feeds()[i].url),
+            (typeof(config.feeds()[i].category) !== 'undefined') ?
+              String(config.feeds()[i].category) :
+              undefined,
+            function (err, struct) {
+              log(struct);
+            }
+          );
+          /* eslint-enable no-loop-func */
+          /* jshint +W083 */
         }
       });
+      log(config.feeds());
     }
 
     // Stop tasks
