@@ -39,7 +39,7 @@ __(Note: These building instructions may get out of date from time to time due t
 
 > ~~If grunt fails with errors, you may have not installed it properly. The NodeJS and Grunt guys probably know more about it than I do~~
 
-### API~~
+### ~~API~~
 * ~~Clone the repo~~
 * ~~Install go (`packer -S go-git`)~~
 * ~~Set $GOPATH (`export GOPATH=$HOME/.go`)~~
