@@ -49,9 +49,10 @@ function parse(err, body, callback) {
     }
   }
   parseString(body, function (err, result) {
-    let xmlns = '';
     let torrentTag = false;
     let torrentNameSpace = false;
+    let atomFeed = false;
+    let rssFeed = false;
     let namespace = '';
     let torrent;
     let item;
@@ -66,49 +67,73 @@ function parse(err, body, callback) {
       bitcannon.error(err);
       throw err;
     }
+    if (result.hasOwnProperty('rss')) {
+      rssFeed = true;
+    }
     try {
-      // <torrent xmlns="http://xmlns.ezrss.it/0.1/">
-      //    <infoHash>...</infoHash>
-      // </torrent>
-      xmlns = result.rss.channel[0].torrent[0].$.xmlns;
-      torrentTag = true;
+      if (typeof(result.rss.channel[0].torrent[0].$.xmlns) !== 'undefined') {
+        // <torrent xmlns="http://xmlns.ezrss.it/0.1/">
+        //    <infoHash>...</infoHash>
+        // </torrent>
+        torrentTag = true;
+      }
     } catch (err) {
       try {
-        // <rss xmlns:torrent="http://xmlns.ezrss.it/0.1/">
-        //    <torrent:infoHash>...</torrent:infoHash>
-        // </rss>
-        xmlns = result.rss.$['xmlns:torrent'];
-        torrentNameSpace = true;
-      } catch (err) {
-        // <rss xmlns:atom="http://www.w3.org/2005/Atom">
-        //    ...
-        //    <enclosure url="http://example.com/example.torrent"
-        //               type="application/x-bittorrent"
-        //               length="10000"
-        //    />
-        //    ...
-        // </rss>
-        try {
-          xmlns = result.rss.$['xmlns:atom'];
-        } catch (err) {
-          bitcannon.error(err);
+        if (typeof(result.rss.$['xmlns:torrent']) !== 'undefined') {
+          // <rss xmlns:torrent="http://xmlns.ezrss.it/0.1/">
+          //    <torrent:infoHash>...</torrent:infoHash>
+          // </rss>
+          torrentNameSpace = true;
+        } else {
           throw err;
+        }
+      } catch (err) {
+        try {
+          if (typeof(result.rss.$['xmlns:atom']) !== 'undefined') {
+            // <rss xmlns:atom="http://www.w3.org/2005/Atom">
+            //    ...
+            //    <enclosure url="http://example.com/example.torrent"
+            //               type="application/x-bittorrent"
+            //               length="10000"
+            //    />
+            //    ...
+            // </rss>
+            atomFeed = true;
+          } else {
+            throw err;
+          }
+        } catch (err) {
+          if (!rssFeed) {
+            bitcannon.error('This isn\'t an RSS feed!');
+            bitcannon.error('If you think this is a mistake' +
+            ' please file an issue (' +
+              'https://github.com/aidanharris/bitcannon/issues)');
+            throw err;
+          }
         }
       }
     }
-    if (torrentNameSpace || torrentTag) {
-      if (torrentNameSpace) {
-        namespace = 'torrent:';
-        torrent = result.rss.channel[0].item;
-      } else {
-        torrent = result.rss.channel[0].torrent;
-        item = result.rss.channel[0].item;
-      }
-      for (let i = 0, struct = bitcannon.providers.torrentStruct();
-        i < result.rss.channel[0].item.length; i++) {
-        struct.category = torrent[i].category || item[i].category;
-        struct.title = torrent[i].title || item[i].title;
-        struct.details = torrent[i].guid || item[i].guid;
+
+    if (torrentNameSpace) {
+      namespace = 'torrent:';
+      torrent = result.rss.channel[0].item;
+    } else if (torrentTag) {
+      torrent = result.rss.channel[0].torrent;
+      item = result.rss.channel[0].item;
+    } else {
+      bitcannon.log('Parsing plain RSS or Atom feed');
+      bitcannon.log('BitCannon works best with feeds ' +
+      'that use the torrent format but we\'ll try our best!');
+      item = result.rss.channel[0].item;
+      torrent = result.rss.channel[0].item;
+    }
+
+    for (let i = 0, struct = bitcannon.providers.torrentStruct();
+      i < result.rss.channel[0].item.length; i++) {
+      struct.category = torrent[i].category || item[i].category;
+      struct.title = torrent[i].title || item[i].title;
+      struct.details = torrent[i].guid || item[i].guid;
+      if (torrentNameSpace || torrentTag) {
         for (let j = 0; j < torrentTags.length; j++) {
           switch (torrentTags[j]) {
             case 'seeds':
@@ -136,30 +161,32 @@ function parse(err, body, callback) {
             torrent[i][namespace + torrentTags[j]]);
           */
         }
-        if (typeof(struct._id) === 'undefined') {
-          if (
-            torrent[i].enclosure[0].$.url
-              .substring(
-                (torrent[i].enclosure[0].$.url.length - 8)
-              ) === '.torrent'
-          ) {
-            // Always pass a copy of struct to getTorrentInfo, not a reference.
-            // Using a reference (which is the default behaviour) causes values
-            // to change within the function because of the loop.
-            getTorrentInfo(
-              torrent[i].enclosure[0].$.url,
-              JSON.parse(JSON.stringify(struct))
-            );
-          }
-        } else {
+      } else {
+        bitcannon.log('Regular RSS or Atom feed!');
+        console.dir(struct);
+      }
+      if (typeof(struct._id) === 'undefined' ||
+      typeof(struct._id) === 'function') {
+        if (
+          torrent[i].enclosure[0].$.url
+            .substring(
+              (torrent[i].enclosure[0].$.url.length - 8)
+            ) === '.torrent'
+        ) {
+          // Always pass a copy of struct to getTorrentInfo, not a reference.
+          // Using a reference (which is the default behaviour) causes values
+          // to change within the function because of the loop.
           getTorrentInfo(
-            String(struct._id),
+            torrent[i].enclosure[0].$.url,
             JSON.parse(JSON.stringify(struct))
           );
         }
+      } else {
+        getTorrentInfo(
+          String(struct._id),
+          JSON.parse(JSON.stringify(struct))
+        );
       }
-    } else {
-      console.log(xmlns);
     }
   });
 }
