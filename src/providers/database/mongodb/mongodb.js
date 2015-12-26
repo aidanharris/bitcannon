@@ -285,7 +285,10 @@ module.exports = (function () {
   }
 
   function addTorrent(torrent, callback) {
-    return callback(torrent);
+    bitcannonTorrentsModel.collection.insert(torrent);
+    if (typeof(callback) === 'function') {
+      return callback(torrent);
+    }
   }
 
   function deleteRecord(id, callback) {
@@ -299,7 +302,7 @@ module.exports = (function () {
     test,
     exists,
     get: get(),
-    addTorrent,
+    add: addTorrent,
     update: update(),
     delete: deleteRecord,
   };

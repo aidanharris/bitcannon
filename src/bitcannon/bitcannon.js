@@ -462,7 +462,23 @@ module.exports = function (configFile) {
               String(config.feeds()[i].category) :
               undefined,
             function (err, struct) {
-              log(struct);
+              module.exports.database.exists(struct._id,
+                function (err, torrent) {
+                  try {
+                    if (torrent.length === 0) {
+                      module.exports.database.add(struct, function () {
+                        log('Added ' + struct.title + ' to the database.');
+                      });
+                    } else {
+                      log('Skipping ' + struct.title);
+                      // Should update the seeder and leecher count here
+                    }
+                  } catch (err) {
+                    error(err);
+                    throw err;
+                  }
+                }
+              );
             }
           );
           /* eslint-enable no-loop-func */
