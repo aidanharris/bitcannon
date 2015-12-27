@@ -63,16 +63,20 @@ module.exports = function (feedURL, category, callback) {
             }
             struct._id = parsedTorrent.infoHash.toUpperCase();
             bitcannon.scrape(struct._id, function (err, swarm) {
-              struct.swarm.leechers = swarm.Leechers;
-              struct.swarm.seeders = swarm.Seeders;
+              struct.swarm.leechers = (struct.swarm.leechers === -1) ? 0
+                  : swarm.Leechers;
+              struct.swarm.seeders = (struct.swarm.seeders === -1) ? 0
+                  : swarm.Seeders;
               return callback(err, struct);
             });
           }
         );
       } else {
         return bitcannon.scrape(struct._id, function (err, swarm) {
-          struct.swarm.leechers = swarm.Leechers;
-          struct.swarm.seeders = swarm.Seeders;
+          struct.swarm.leechers = (struct.swarm.leechers === -1) ? 0
+              : swarm.Leechers;
+          struct.swarm.seeders = (struct.swarm.seeders === -1) ? 0
+              : swarm.Seeders;
           return callback(err, struct);
         });
       }
