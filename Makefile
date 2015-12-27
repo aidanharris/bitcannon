@@ -16,3 +16,7 @@ deps:
 	npm install
 	@cd src/providers/rss; \
 	npm install
+eslint-deps:
+	npm install -g eslint
+	npm install -g eslint-config-airbnb
+	npm install -g eslint-plugin-react
