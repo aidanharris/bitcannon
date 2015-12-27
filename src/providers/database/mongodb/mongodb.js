@@ -21,7 +21,9 @@ module.exports = (function () {
 
   // To Do
   // * Make this dynamic instead of hardcoded
-  const dbURI = 'mongodb://localhost/bitcannon';
+  const dbURI = 'mongodb://' +
+    bitcannon.config.databaseConfig().address + '/' +
+    bitcannon.config.databaseConfig().database;
 
   const open = function (callback) {
     let db;
