@@ -11,6 +11,7 @@ deps:
 	npm install
 	@cd src/server; \
 	npm install; \
+	npm install -g bower; \
 	bower install
 	@cd src/providers/database/mongodb; \
 	npm install
