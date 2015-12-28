@@ -22,7 +22,16 @@ module.exports = (function () {
   // To Do
   // * Make this dynamic instead of hardcoded
   const dbURI = 'mongodb://' +
-    bitcannon.config.databaseConfig().address + '/' +
+    (
+        (typeof(bitcannon.config.databaseConfig().user) !== 'undefined') ?
+        bitcannon.config.databaseConfig().user : ''
+    ) +
+    (
+        (typeof(bitcannon.config.databaseConfig().password) !== 'undefined') ?
+        ' : ' + bitcannon.config.databaseConfig().password + ' @' : ''
+    ) +
+    bitcannon.config.databaseConfig().address + ':' +
+    bitcannon.config.databaseConfig().port + '/' +
     bitcannon.config.databaseConfig().database;
 
   const open = function (callback) {
@@ -50,7 +59,7 @@ module.exports = (function () {
     } else {
       // We have a connection so trigger the callback
       if (typeof(callback) === 'function') {
-        return callback();
+        return callback(undefined);
       }
     }
   };
@@ -61,6 +70,16 @@ module.exports = (function () {
         return callback();
       }
     });
+  };
+
+  // Perform any setup necessary to create the database.
+  // Mongoose doesn't need this since it will create any
+  // collections that do not exist when inserting documents.
+  // However other databases might not do this and require
+  // an initial setup to create the database and any tables
+  // this function should be used to do that.
+  const setup = function (callback) {
+    return;
   };
 
   // Public function that tests connecting to the database
@@ -74,9 +93,16 @@ module.exports = (function () {
         }
       } else {
         log('[OK!] Sucessfully connected to ' + dbURI);
-      }
-      if (typeof(callback) === 'function') {
-        return callback(err);
+        mongoose.connection.db.listCollections({name: 'torrents'})
+            .next(function (err, collinfo) {
+              if (!collinfo) {
+                // The collection exists
+                error('torrents collection does not exist!');
+                error('Creating it...');
+                setup();
+              }
+              return callback(err);
+            });
       }
     });
   };

@@ -134,6 +134,7 @@ module.exports = function (configFile) {
     'database': 'mongodb',
     'databaseConfig': {
       'address': '127.0.0.1',
+      'port': '27017',
       'database': 'bitcannon',
     },
     'debugLevel': 0,
@@ -234,6 +235,8 @@ module.exports = function (configFile) {
    */
   const exit = function (exitCode) {
     log('BitCannon is shutting down...');
+    log('Closing connections to ' + module.exports.database.name + '...');
+    module.exports.database.close();
     /*
      To Do
      * Close any open database connections here.
@@ -245,8 +248,8 @@ module.exports = function (configFile) {
     process.exit(0);
   });
 
-  process.on('exit', function () {
-    exit(0);
+  process.on('exit', function (exitCode) {
+    exit(((typeof(exitCode) === 'number') ? exitCode : 0));
   });
 
   const providers = (function () {
@@ -496,7 +499,6 @@ module.exports = function (configFile) {
           /* jshint +W083 */
         }
       });
-      log(config.feeds());
     }
 
     // Stop tasks
