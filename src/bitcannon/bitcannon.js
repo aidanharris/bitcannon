@@ -232,6 +232,8 @@ module.exports = function (configFile) {
       }
     }
   })(configFile);
+  
+  module.exports.exitCalled = false;
 
   // Function to be called to handle exiting BitCannon
   /*
@@ -239,14 +241,13 @@ module.exports = function (configFile) {
    Ideally this should prevent any data from getting corrupted
    */
   const exit = function (exitCode) {
-    log('BitCannon is shutting down...');
-    log('Closing connections to ' + module.exports.database.name + '...');
-    module.exports.database.close();
-    /*
-     To Do
-     * Close any open database connections here.
-     */
-    process.exit(((typeof exitCode === 'undefined') ? 1 : exitCode));
+    if(!module.exports.exitCalled) {
+        module.exports.exitCalled = true;
+        log('BitCannon is shutting down...');
+        log('Closing connections to ' + module.exports.database.name + '...');
+        module.exports.database.close();
+    }
+    return process.exit(((typeof exitCode === 'undefined') ? 1 : exitCode));
   };
 
   process.on('SIGINT', function () {

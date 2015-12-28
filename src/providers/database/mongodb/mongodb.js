@@ -46,7 +46,7 @@ module.exports = (function () {
       // When successfully connected
       db.on('connected', function () {
         if (typeof(callback) === 'function') {
-          return callback();
+          return callback(err);
         }
       });
 
@@ -91,6 +91,7 @@ module.exports = (function () {
         if (bitcannon.config.debugLevel() > 0) {
           error(err);
         }
+        callback(err);
       } else {
         log('[OK!] Sucessfully connected to ' + dbURI);
         mongoose.connection.db.listCollections({name: 'torrents'})
