@@ -44,7 +44,7 @@ module.exports = (function () {
 
       // CONNECTION EVENTS
       // When successfully connected
-      db.on('connected', function () {
+      db.on('connected', function (err) {
         if (typeof(callback) === 'function') {
           return callback(err);
         }
