@@ -122,6 +122,15 @@ function onListening() {
     ((address === '0.0.0.0') ? '127.0.0.1' : address) +
     ':' + port + '/'
   );
+  try {
+    if (bitcannon.config.openBrowser()) {
+      require('./src/bitcannon/node_modules/opener')('http://' +
+          ((address === '0.0.0.0') ? '127.0.0.1' : address) +
+          ':' + port + '/');
+    }
+  } catch (err) {
+    // Failed to open browser
+  }
 }
 
 

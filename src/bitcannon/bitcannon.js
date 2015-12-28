@@ -47,6 +47,9 @@ module.exports = function (configFile) {
     function databaseConfig() {
       return nconf.get('databaseConfig');
     }
+    function openBrowser() {
+      return nconf.get('openBrowser');
+    }
     function debugLevel() {
       return nconf.get('debugLevel');
     }
@@ -86,6 +89,7 @@ module.exports = function (configFile) {
       bitcannonBindIp,
       database,
       databaseConfig,
+      openBrowser,
       debugLevel,
       scrapeEnabled,
       scrapeDelay,
@@ -137,6 +141,7 @@ module.exports = function (configFile) {
       'port': '27017',
       'database': 'bitcannon',
     },
+    'openBrowser': true,
     'debugLevel': 0,
     'scrapeEnabled': true,
     'scrapeDelay': 0,

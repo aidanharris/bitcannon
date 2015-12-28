@@ -22,6 +22,7 @@
     "bittorrent-tracker": "^6.3.4",
     "cron": "^1.1.0",
     "nconf": "^0.8.2",
+    "opener": "^1.4.1",
     "parse-torrent": "^5.7.0"
   }
 }

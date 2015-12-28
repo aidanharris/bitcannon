@@ -96,7 +96,7 @@ module.exports = (function () {
         mongoose.connection.db.listCollections({name: 'torrents'})
             .next(function (err, collinfo) {
               if (!collinfo) {
-                // The collection exists
+                // The collection does not exist
                 error('torrents collection does not exist!');
                 error('Creating it...');
                 setup();
