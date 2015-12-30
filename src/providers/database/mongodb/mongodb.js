@@ -1,6 +1,6 @@
 'use strict';
 
-const bitcannon = require('../../../bitcannon')();
+const bitcannon = require('../../../bitcannon/bitcannon-core')();
 const mongoose = require('mongoose');
 
 const Schema = mongoose.Schema;

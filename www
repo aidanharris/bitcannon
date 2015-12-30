@@ -2,6 +2,31 @@
 
 'use strict';
 
+if (process.env.NODE_ENV !== 'production') {
+  try {
+    // Verbose stack traces
+    require('longjohn');
+  } catch (err) {
+    console.warn('Error loading longjohn');
+    console.warn(err);
+    console.warn(err.message);
+  }
+  /* jshint ignore:start */
+  /* eslint-disable no-unused-vars */
+  try {
+    // Allows dumping the heap (dumps can be viewed in chrome dev tools)
+    // To produce a dump use `kill -USR 2 pid` on a UNIX like OS or manually
+    // trigger one in node.js using heapdump.writeSnapshot()
+    const heapdump = require('heapdump');
+  } catch (err) {
+    console.warn('Error loading heapdump');
+    console.warn(err);
+    console.warn(err.message);
+  }
+  /* eslint-enable no-unused-vars */
+  /* jshint ignore:end */
+}
+
 /**
  * Module dependencies.
  */
@@ -15,7 +40,19 @@ let http;
 let port;
 let address;
 
-const bitcannon = require('./src/bitcannon')(__dirname + '/config.json');
+const bitcannon = require('./src/bitcannon/bitcannon-core')(
+    __dirname +
+    '/config.json'
+);
+
+// Handle application exit
+process.once('SIGINT', function () {
+  process.exit(0);
+});
+
+process.once('exit', function (exitCode) {
+  bitcannon.exit(((typeof(exitCode) === 'number') ? exitCode : 0));
+});
 
 if (bitcannon.config.debugLevel() > 2) {
   debug. enable('express:*'); // Detailed output from the express web server
@@ -47,6 +84,8 @@ bitcannon.database.test(function (err) {
 
 app = require(serverDirectory + '/main');
 
+// Disable x-powered-by so that express does not
+// show up in HTTP response headers.
 app.disable('x-powered-by');
 
 http = require('http');

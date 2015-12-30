@@ -7,7 +7,7 @@ const fs = require('fs');
 
 const rss = require('../providers/rss');
 
-const CronJob = require('cron').CronJob;
+// const CronJob = require('cron').CronJob;
 
 const nconf = require('nconf');
 
@@ -110,7 +110,8 @@ module.exports = function (configFile) {
    bitcannonPort: The port the web server will listen on.
    bitcannonBindIp: The network interface that the server will bind to.
    - Should we bind to localhost (127.0.0.1) by default?
-   databse: The database provider to use. If not given the default provider (mongodb) is used.
+   databse: The database provider to use. If not given the default
+   provider (mongodb) is used.
 
    scrapeEnabled:
    scrapeDelay:
@@ -164,11 +165,13 @@ module.exports = function (configFile) {
   };
 
   /*
-   If config is undefined we add a default configuration to nconf to be used if the config file fails to load
-   or if environments variables or command line arguments are not set.
+   If config is undefined we add a default configuration to nconf to be used if
+   the config file fails to load or if environments variables or command line
+   arguments are not set.
 
-   If config is set then we reset the configuration value in question to default. This is useful if the user has
-   set the configuration else where but for whatever reason it is incorrect. This way instead of crashing we can
+   If config is set then we reset the configuration value in question to
+   default. This is useful if the user has set the configuration else where
+   but for whatever reason it is incorrect. This way instead of crashing we can
    warn the user and continue running with default values.
    */
   const setDefaults = function (config, value, next) {
@@ -232,31 +235,19 @@ module.exports = function (configFile) {
       }
     }
   })(configFile);
-  
-  module.exports.exitCalled = false;
 
   // Function to be called to handle exiting BitCannon
   /*
-   This should do things such as closing any open database connections and stopping any imports etc
-   Ideally this should prevent any data from getting corrupted
+   This should do things such as closing any open database connections
+   and stopping any imports etc. Ideally this should prevent any data
+   from getting corrupted.
    */
   const exit = function (exitCode) {
-    if(!module.exports.exitCalled) {
-        module.exports.exitCalled = true;
-        log('BitCannon is shutting down...');
-        log('Closing connections to ' + module.exports.database.name + '...');
-        module.exports.database.close();
-    }
+    log('BitCannon is shutting down...');
+    log('Closing connections to ' + module.exports.database.name + '...');
+    module.exports.database.close();
     return process.exit(((typeof exitCode === 'undefined') ? 1 : exitCode));
   };
-
-  process.on('SIGINT', function () {
-    process.exit(0);
-  });
-
-  process.on('exit', function (exitCode) {
-    exit(((typeof(exitCode) === 'number') ? exitCode : 0));
-  });
 
   const providers = (function () {
     // Database schema - All database providers must implement this
@@ -356,42 +347,62 @@ module.exports = function (configFile) {
     const peerId = new Buffer('01234567890123456789');
     const port = 6881;
 
-    const client = new Client(peerId, port, parsedTorrent);
+    let client = new Client(peerId, port, parsedTorrent);
+    /* eslint-disable no-unused-vars */
+    let error;
+    let warning;
+    let scrape;
+    /* eslint-enable no-unused-vars */
 
     let numberOfSeeders = 0;
     let numberOfLeechers = 0;
     let successfulScrapes = 0;
-    const trackers = JSON.parse(JSON.stringify(parsedTorrent.announce));
+    let trackers = JSON.parse(JSON.stringify(parsedTorrent.announce));
 
 
     let callbackCalled = false;
 
     function callCallback(err) {
-      if (trackers.length <= 0) {
-        client.stop(); // Gracefully leave the swarm
-        if (!callbackCalled) {
-          callbackCalled = true;
-          if (config.debugLevel() > 1) {
-            log('[OK] Finished Scraping ' + parsedTorrent.infoHash);
-          }
-          // log('Average number of leechers in swarm: ' + numberOfLeechers);
-          // log('Average number of seeders in swarm: ' + numberOfSeeders);
-          if (successfulScrapes > 0) {
+      if (typeof(trackers) !== 'undefined') {
+        if (trackers.length === 0) {
+          client.stop({}); // Gracefully leave the swarm
+          if (!callbackCalled) {
+            callbackCalled = true;
+            // Set variables that are no longer used to undefined.
+            // Hopefully the garbage collector will see this and will
+            // cleanup preventing any memory leaks that previously occurred
+            // (most notably when scraping a large amount of torrents at one
+            // time).
+            trackers = undefined;
+            client = undefined;
+            error = undefined;
+            warning = undefined;
+            scrape = undefined;
+
+            if (config.debugLevel() > 1) {
+              log('[OK] Finished Scraping ' + parsedTorrent.infoHash);
+            }
+            // log('Average number of leechers in swarm: ' + numberOfLeechers);
+            // log('Average number of seeders in swarm: ' + numberOfSeeders);
+            if (successfulScrapes > 0) {
+              return callback(err, {
+                'Leechers': numberOfLeechers,
+                'Seeders': numberOfSeeders,
+              });
+            }
             return callback(err, {
-              'Leechers': numberOfLeechers,
-              'Seeders': numberOfSeeders,
+              'Leechers': -1,
+              'Seeders': -1,
             });
           }
-          return callback(err, {
-            'Leechers': -1,
-            'Seeders': -1,
-          });
         }
       }
     }
 
-    client.on('error', function (err) {
-      trackers.pop();
+    error = client.on('error', function (err) {
+      if (typeof(trackers) !== 'undefined') {
+        trackers.pop();
+      }
       // Only log scraping errors if debugLevel is greater than 1
       // The reason for this is bittorrent-tracker tends to spam the logs
       // This could be a problem with my code?
@@ -399,27 +410,33 @@ module.exports = function (configFile) {
         // fatal client error!
         error(err.message);
       }
+
       return callCallback(err);
     });
 
-    client.on('warning', function (err) {
-      trackers.pop();
+    warning = client.on('warning', function (err) {
+      if (typeof(trackers) !== 'undefined') {
+        trackers.pop();
+      }
       if (config.debugLevel() > 1) {
-        // a tracker was unavailable or sent bad data to the client. you can probably ignore it
+        // a tracker was unavailable or sent bad data to the client.
+        // you can probably ignore it
         error(err.message);
       }
       return callCallback(err);
     });
 
     // start getting peers from the tracker
-    client.start();
+    client.start({});
 
     // scrape
-    client.scrape();
+    client.scrape({});
 
-    //log('Scraping torrent ' + ' with infohash ' + parsedTorrent.infoHash);
-    client.on('scrape', function (data) {
-      trackers.pop();
+    // log('Scraping torrent ' + ' with infohash ' + parsedTorrent.infoHash);
+    scrape = client.on('scrape', function (data) {
+      if (typeof(trackers) !== 'undefined') {
+        trackers.pop();
+      }
       successfulScrapes++; // Increment the number of successful scrapes
 
       // Gets an average parsed as an integer (you can't have half a seeder)
@@ -436,13 +453,13 @@ module.exports = function (configFile) {
 
   function tasks() {
     // All scheduled tasks will be pushed to this array
-    let jobs = [];
+    const jobs = [];
     // All archive providers will be stored here before
     // being pushed to the jobs array
-    let archives = [];
+    // let archives = [];
     // All feeds will be stored here before being pushed
     // to the jobs array.
-    let feeds = [];
+    // let feeds = [];
 
     function startup(callback) {
       if (jobs.length === 0) {
@@ -479,6 +496,15 @@ module.exports = function (configFile) {
               String(config.feeds()[i].category) :
               undefined,
             function (err, struct) {
+              if (typeof(struct._id) === 'undefined') {
+                error(struct);
+                error(err);
+                if (typeof(err) !== 'undefined') {
+                  throw err;
+                } else {
+                  throw new Error();
+                }
+              }
               module.exports.database.exists(struct._id,
                 function (err, torrent) {
                   try {

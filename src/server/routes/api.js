@@ -1,5 +1,5 @@
 'use strict';
-const bitcannon = require('../../bitcannon')();
+const bitcannon = require('../../bitcannon/bitcannon-core')();
 const express = require('express');
 const router = new express.Router();
 

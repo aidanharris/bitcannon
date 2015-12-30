@@ -23,7 +23,7 @@ const zlib = require('zlib');
   used to update the database.
 */
 module.exports = function (feedURL, category, callback) {
-  const bitcannon = require('../../bitcannon')();
+  const bitcannon = require('../../bitcannon/bitcannon-core')();
   if (bitcannon.config.debugLevel() > 2) {
     require('request-debug')(request);
   }
@@ -267,16 +267,16 @@ module.exports = function (feedURL, category, callback) {
   }, function (error, response, body) {
     if (error) {
       bitcannon.error(error);
-      throw error;
+      return callback(error);
     }
     switch (response.headers['content-encoding']) {
       case 'gzip':
         gunzip(body, function (err, body) {
-          parse(err, body, feedURL, callback);
+          return parse(err, body, feedURL, callback);
         });
         break;
       default:
-        parse(undefined, body, feedURL, callback);
+        return parse(undefined, body, feedURL, callback);
         break;
     }
   });

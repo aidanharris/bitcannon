@@ -1,8 +1,8 @@
 {
-  "name": "bitcannon-core",
+  "name": "bitcannon",
   "version": "0.0.0",
   "description": "A torrent index archiving, browsing, and backup tool",
-  "main": "bitcannoc-core.js",
+  "main": "www",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/aidanharris/bitcannon.git"
@@ -16,13 +16,11 @@
   "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ./bin/www"
+    "start": "node ./www"
   },
-  "dependencies": {
-    "bittorrent-tracker": "^6.3.4",
-    "cron": "^1.1.0",
-    "nconf": "^0.8.2",
-    "opener": "^1.4.1",
-    "parse-torrent": "^5.7.0"
+  "dependencies": {},
+  "devDependencies": {
+    "heapdump": "^0.3.7",
+    "longjohn": "^0.2.11"
   }
 }
