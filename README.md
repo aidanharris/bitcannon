@@ -1,5 +1,5 @@
 # BitCannon
-~~A torrent site mirroring tool~~
+A torrent site mirroring tool
 
 ## About
 The goal of BitCannon is to provide the tools to easily aggregate the content of many torrent sites into an easily browse-able format.
