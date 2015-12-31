@@ -256,7 +256,7 @@ module.exports = function (feedURL, category, callback) {
   request({
     'uri': feedURL,
     'headers': {
-      'User-Agent': 'BitCannon (http://bitcannon.io)',
+      'User-Agent': 'BitCannon (https://github.com/aidanharris/bitcannon)',
       'Accept-Encoding': 'gzip',
     },
     'encoding': null,
