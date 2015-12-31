@@ -10,6 +10,8 @@ BitCannon aims to be as user friendly as possible while still providing robustne
 
 You can view a demo of BitCannon [HERE](https://bitcannon.aidanharr.is).
 
+The demo uses [Docker](https://github.com/aidanharris/bitcannon/wiki/Installing-BitCannon#using-docker) and is restarted every fifteen minutes.
+
 ## Project Mirrors
 This project is available on:
 * ~~[GitHub](https://github.com/Stephen304/bitcannon)~~
