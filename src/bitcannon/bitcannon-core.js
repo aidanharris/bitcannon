@@ -499,6 +499,8 @@ module.exports = function (configFile) {
               if (!err) {
                 module.exports.database.exists(struct._id,
                     function (err, torrent) {
+                      let record;
+                      let recordID;
                       try {
                         if (torrent.length === 0) {
                           struct.lastmod = new Date().toISOString();
@@ -510,6 +512,12 @@ module.exports = function (configFile) {
                         } else {
                           log('Skipping ' + struct.title);
                           // Should update the seeder and leecher count here
+                          torrent[0].swarm.seeders = struct.swarm.seeders;
+                          torrent[0].swarm.leechers = struct.swarm.leechers;
+                          record = torrent[0].toObject();
+                          recordID = String(torrent[0]._id);
+                          delete record._id;
+                          module.exports.database.update.record(recordID, record);
                         }
                       } catch (err) {
                         error(err);
