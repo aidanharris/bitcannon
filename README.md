@@ -14,9 +14,8 @@ The demo uses [Docker](https://github.com/aidanharris/bitcannon/wiki/Installing-
 
 ## Project Mirrors
 This project is available on:
-* ~~[GitHub](https://github.com/Stephen304/bitcannon)~~
-* ~~[BitBucket](https://bitbucket.org/Stephen304/bitcannon)~~
-* ~~[Google Code](https://code.google.com/p/bitcannon/)~~
+* [GitHub](https://github.com/aidanharris/bitcannon)
+* [BitBucket](https://bitbucket.org/aidanharris/bitcannon)
 
 ## How to use: Simple Set-Up
 [See the Wiki for regular easy set up instructions](https://github.com/aidanharris/bitcannon/wiki)
