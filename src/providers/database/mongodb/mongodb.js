@@ -102,6 +102,10 @@ module.exports = (function () {
                 error('Creating it...');
                 setup();
               }
+              mongoose.connection.collections.torrents.createIndex(
+                  { '_id': 'text', 'title': 'text' },
+                  { 'unique': false }
+              );
               return callback(err);
             });
       }

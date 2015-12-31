@@ -24,7 +24,7 @@ const zlib = require('zlib');
 */
 module.exports = function (feedURL, category, callback) {
   const bitcannon = require('../../bitcannon/bitcannon-core')();
-  if (bitcannon.config.debugLevel() > 2) {
+  if (bitcannon.config.debugLevel() > 1) {
     require('request-debug')(request);
   }
   function gunzip(body, callback) {
@@ -56,7 +56,7 @@ module.exports = function (feedURL, category, callback) {
               bitcannon.log('Does your ISP block or censor?');
               bitcannon.log('Do you have any security software such as a ' +
                 'firewall or anti-virus?');
-              return;
+              return callback(err, struct);
             }
             if (struct.size === 0) {
               struct.size = parsedTorrent.length;
@@ -67,7 +67,7 @@ module.exports = function (feedURL, category, callback) {
                   : swarm.Leechers;
               struct.swarm.seeders = (struct.swarm.seeders === -1) ? 0
                   : swarm.Seeders;
-              return callback(err, struct);
+              return callback(undefined, struct);
             });
           }
         );
@@ -77,7 +77,7 @@ module.exports = function (feedURL, category, callback) {
               : swarm.Leechers;
           struct.swarm.seeders = (struct.swarm.seeders === -1) ? 0
               : swarm.Seeders;
-          return callback(err, struct);
+          return callback(undefined, struct);
         });
       }
     }
@@ -99,8 +99,7 @@ module.exports = function (feedURL, category, callback) {
       ];
 
       if (err) {
-        bitcannon.error(err);
-        throw err;
+        return callback(err);
       }
       if (result.hasOwnProperty('rss')) {
         rssFeed = true;
@@ -143,7 +142,7 @@ module.exports = function (feedURL, category, callback) {
               bitcannon.error('If you think this is a mistake' +
                 ' please file an issue (' +
                 'https://github.com/aidanharris/bitcannon/issues)');
-              throw err;
+              return callback(err);
             }
           }
         }
@@ -253,6 +252,8 @@ module.exports = function (feedURL, category, callback) {
     });
   }
 
+  let encodingUsed;
+
   request({
     'uri': feedURL,
     'headers': {
@@ -265,8 +266,11 @@ module.exports = function (feedURL, category, callback) {
     'maxRedirects': 10,
     'removeRefererHeader': true,
   }, function (error, response, body) {
-    if (error) {
-      bitcannon.error(error);
+    if(error) {
+      if (bitcannon.config.debugLevel() > 1) {
+        bitcannon.error(error);
+      }
+      bitcannon.error(error.message);
       return callback(error);
     }
     switch (response.headers['content-encoding']) {
@@ -279,5 +283,11 @@ module.exports = function (feedURL, category, callback) {
         return parse(undefined, body, feedURL, callback);
         break;
     }
+  }).on('error', function (error) {
+    if (bitcannon.config.debugLevel() > 1) {
+      bitcannon.error(error);
+    }
+    bitcannon.error(error.message);
+    return callback(error);
   });
 };

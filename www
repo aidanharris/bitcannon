@@ -77,6 +77,17 @@ bitcannon.database.test(function (err) {
     bitcannon.error('Please make sure it is installed and running.');
     bitcannon.exit(1);
   } else {
+    try {
+      if (bitcannon.config.openBrowser()) {
+        require('./src/bitcannon/node_modules/opener')('http://' +
+            ((address === '0.0.0.0') ? '127.0.0.1' : address) +
+            ':' + port + '/');
+      }
+    } catch (err) {
+      bitcannon.error('Failed to open browser!');
+      bitcannon.error(err);
+      bitcannon.error(err.message);
+    }
     // Start the task scheduler for archive providers
     bitcannon.tasks.start();
   }
@@ -161,15 +172,6 @@ function onListening() {
     ((address === '0.0.0.0') ? '127.0.0.1' : address) +
     ':' + port + '/'
   );
-  try {
-    if (bitcannon.config.openBrowser()) {
-      require('./src/bitcannon/node_modules/opener')('http://' +
-          ((address === '0.0.0.0') ? '127.0.0.1' : address) +
-          ':' + port + '/');
-    }
-  } catch (err) {
-    // Failed to open browser
-  }
 }
 
 

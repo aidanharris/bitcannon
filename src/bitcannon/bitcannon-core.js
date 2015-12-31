@@ -349,7 +349,7 @@ module.exports = function (configFile) {
 
     let client = new Client(peerId, port, parsedTorrent);
     /* eslint-disable no-unused-vars */
-    let error;
+    let errorHandeler;
     let warning;
     let scrape;
     /* eslint-enable no-unused-vars */
@@ -375,7 +375,7 @@ module.exports = function (configFile) {
             // time).
             trackers = undefined;
             client = undefined;
-            error = undefined;
+            errorHandeler = undefined;
             warning = undefined;
             scrape = undefined;
 
@@ -399,7 +399,7 @@ module.exports = function (configFile) {
       }
     }
 
-    error = client.on('error', function (err) {
+    errorHandeler = client.on('error', function (err) {
       if (typeof(trackers) !== 'undefined') {
         trackers.pop();
       }
@@ -496,35 +496,33 @@ module.exports = function (configFile) {
               String(config.feeds()[i].category) :
               undefined,
             function (err, struct) {
-              if (typeof(struct._id) === 'undefined') {
-                error(struct);
-                error(err);
-                if (typeof(err) !== 'undefined') {
-                  throw err;
-                } else {
-                  throw new Error();
-                }
-              }
-              module.exports.database.exists(struct._id,
-                function (err, torrent) {
-                  try {
-                    if (torrent.length === 0) {
-                      struct.lastmod = new Date().toISOString();
-                      struct.imported = struct.lastmod;
-                      struct.size = struct.size || 0;
-                      module.exports.database.add(struct, function () {
-                        log('Added ' + struct.title + ' to the database.');
-                      });
-                    } else {
-                      log('Skipping ' + struct.title);
-                      // Should update the seeder and leecher count here
+              if (!err) {
+                module.exports.database.exists(struct._id,
+                    function (err, torrent) {
+                      try {
+                        if (torrent.length === 0) {
+                          struct.lastmod = new Date().toISOString();
+                          struct.imported = struct.lastmod;
+                          struct.size = struct.size || 0;
+                          module.exports.database.add(struct, function () {
+                            log('Added ' + struct.title + ' to the database.');
+                          });
+                        } else {
+                          log('Skipping ' + struct.title);
+                          // Should update the seeder and leecher count here
+                        }
+                      } catch (err) {
+                        error(err);
+                        throw err;
+                      }
                     }
-                  } catch (err) {
-                    error(err);
-                    throw err;
-                  }
-                }
-              );
+                );
+              } else {
+                log('An error occurred processing ' + config.feeds()[i].url);
+                error(err);
+                error(err.code);
+                error(err.message);
+              }
             }
           );
           /* eslint-enable no-loop-func */
