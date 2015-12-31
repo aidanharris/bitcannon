@@ -28,7 +28,7 @@ __(Note: These building instructions may get out of date from time to time due t
 
 
 ### BitCannon
-* Install [Node.js](https://github.com/aidanharris/bitcannon/wiki/Installing-Node.js)
+* Install [Node.js](https://github.com/aidanharris/bitcannon/wiki/Installing-Node.js) (version 5.x.x or above because we use some of the newer features of the JavaScript language - const, let, etc…)
 * Clone the repo
 * Install dependencies (`make deps`)
 * Optionally install dependencies for eslint (`make eslint-deps`)
