@@ -6,6 +6,10 @@ The goal of BitCannon is to provide the tools to easily aggregate the content of
 
 BitCannon aims to be as user friendly as possible while still providing robustness and the features you would expect. We hope the average user will use BitCannon to keep personal bittorrent archives, but we strive to produce code that can stand up to running a public mirror as well.
 
+## Demo
+
+You can view a demo of BitCannon [HERE](https://bitcannon.aidanharr.is).
+
 ## Project Mirrors
 This project is available on:
 * ~~[GitHub](https://github.com/Stephen304/bitcannon)~~
