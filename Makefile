@@ -1,10 +1,18 @@
-build:
-	@echo "Building BitCannon..."
+build: build-electron
+	for directory in BitCannon-darwin-x64 BitCannon-linux-ia32 BitCannon-linux-x64 BitCannon-win32-ia32 BitCannon-win32-x64 ; do \
+		7z a ../build/$$directory.zip -tzip -mx=9 ../build/$$directory; \
+	done
+
+define copy-target
+  copy:: ; cd $1 && mkdir foo
+  endef
+
+$(foreach dir,$(directories),$(eval $(call copy-target,$(dir))))
 build-electron:
 	@echo "Building BitCannon with Electron..."
 	@echo "This is experimental, lots of things don't work properly."
 	npm install -g electron-prebuilt;
-	electron-packager . BitCannon --platform=all --arch=all --version=0.36.2 --out ./build/ --overwrite --ignore=build --ignore=Makefile
+	electron-packager . BitCannon --platform=all --arch=all --version=0.36.2 --icon=./src/bitcannon/resources/bitcannon --out ../build --overwrite --ignore=Makefile --ignore=.idea --ignore=.vscode
 clean:
 	@rm -rf node_modules
 	@rm -rf src/bitcannon/node_modules

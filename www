@@ -2,7 +2,10 @@
 
 'use strict';
 
-if (process.env.NODE_ENV !== 'production') {
+if (
+    process.env.NODE_ENV !== 'production' &&
+    typeof(process.versions['atom-shell']) !== 'string'
+) {
   try {
     // Verbose stack traces
     require('longjohn');
@@ -78,7 +81,7 @@ bitcannon.database.test(function (err) {
     bitcannon.exit(1);
   } else {
     try {
-      if (bitcannon.config.openBrowser()) {
+      if (bitcannon.config.openBrowser() !== 'false') {
         require('./src/bitcannon/node_modules/opener')('http://' +
             ((address === '0.0.0.0') ? '127.0.0.1' : address) +
             ':' + port + '/');
