@@ -14,6 +14,11 @@ angular.module('bitCannonApp')
       'AngularJS',
       'Karma',
     ];
+    if ($state.current.pageTitle !== undefined) {
+      document.getElementsByTagName('title')[0].innerHTML =
+        'BitCannon - ' +
+        $state.current.pageTitle;
+    }
     $scope.submit = function () {
       if ($scope.query) {
         if ($scope.selectedCategory) {

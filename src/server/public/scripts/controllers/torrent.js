@@ -14,6 +14,9 @@ angular.module('bitCannonApp')
         $http.get($rootScope.api + 'torrent/' + $scope.btih).
         success(function (data, status) {
           if (status === 200) {
+            document.getElementsByTagName('title')[0].innerHTML =
+              'BitCannon - ' +
+              data.Title;
             $scope.torrent = data;
             $scope.torrent.Size = $scope.torrent.Size / 1048576;
             if ($scope.torrent.Size > 1024) {

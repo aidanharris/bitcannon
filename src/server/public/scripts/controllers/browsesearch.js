@@ -11,6 +11,9 @@ angular.module('bitCannonApp')
   .controller('BrowsesearchCtrl',
     function ($rootScope, $scope, $stateParams, $http) {
       var init = function () {
+        document.getElementsByTagName('title')[0].innerHTML =
+          'BitCannon - ' +
+          $scope.category;
         $http.get($rootScope.api + 'browse/' + $scope.category).
         success(function (data, status) {
           if (status === 200) {

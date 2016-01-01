@@ -15,6 +15,9 @@ angular.module('bitCannonApp')
       'Karma',
     ];
     $scope.query = encodeURIComponent($stateParams.query);
+    document.getElementsByTagName('title')[0].innerHTML =
+      'BitCannon - ' +
+      $stateParams.query;
     $scope.category = $stateParams.category;
     $scope.results = [];
     if (typeof $scope.category !== 'undefined') {
