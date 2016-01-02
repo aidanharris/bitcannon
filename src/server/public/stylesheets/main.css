@@ -52,3 +52,7 @@ input[type="file"] > input[type="button"]::-moz-focus-inner {
 .animate-slide.ng-enter.ng-enter-active {
   top:0;
 }
+
+a .label:hover {
+  color:#2c3e50;
+}
