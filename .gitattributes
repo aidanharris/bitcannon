@@ -1,0 +1,7 @@
+*.zip filter=lfs diff=lfs merge=lfs -text
+dist/BitCannon-darwin-x64.zip filter=lfs diff=lfs merge=lfs -text
+dist/BitCannon-linux-ia32.zip filter=lfs diff=lfs merge=lfs -text
+dist/BitCannon-linux-x64.zip filter=lfs diff=lfs merge=lfs -text
+dist/BitCannon-win32-ia32.zip filter=lfs diff=lfs merge=lfs -text
+dist/BitCannon-win32-x64.zip filter=lfs diff=lfs merge=lfs -text
+dist/v1.0-beta.1.zip filter=lfs diff=lfs merge=lfs -text
