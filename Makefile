@@ -8,6 +8,23 @@ build-electron:
 	npm install -g electron-prebuilt
 	npm install -g electron-packager
 	electron-packager . BitCannon --platform=all --arch=all --version=0.36.2 --icon=./src/bitcannon/resources/bitcannon --out ../build --overwrite --ignore=Makefile --ignore=.idea --ignore=.vscode
+build-docker:
+	@echo "Building Dockerfile..."
+	@echo "To Do: "
+	@echo "  * Add Dockerfile"
+docker-install:
+	@echo "Pulling in containers for Docker..."
+	@echo "Read the wiki for configuration options."
+	docker pull mongo
+	docker pull aidanharris/bitcannon
+	docker run --name bc_mongodb -v /srv/mongodb/data/db:/data/db -p 127.0.0.1:27017:27017 -d mongo
+	docker run -it --name bitcannon -p 127.0.0.1:1337:1337 --link mongodb:mongo "aidanharris/bitcannon" bash -c "NODE_ENV=production node /var/www/www --bitcannonPort 1337 --databaseConfig:address \$(getIP)"
+docker-start:
+	docker start bc_mongodb
+	docker start bitcannon
+docker-stop:
+	docker stop bc_mongodb
+	docker stop bitcannon
 clean:
 	@rm -rf node_modules
 	@rm -rf src/bitcannon/node_modules
