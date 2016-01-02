@@ -5,7 +5,8 @@ build: build-electron
 build-electron:
 	@echo "Building BitCannon with Electron..."
 	@echo "This is experimental, lots of things don't work properly."
-	npm install -g electron-prebuilt;
+	npm install -g electron-prebuilt
+	npm install -g electron-packager
 	electron-packager . BitCannon --platform=all --arch=all --version=0.36.2 --icon=./src/bitcannon/resources/bitcannon --out ../build --overwrite --ignore=Makefile --ignore=.idea --ignore=.vscode
 clean:
 	@rm -rf node_modules
