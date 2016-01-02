@@ -16,6 +16,7 @@ The demo uses [Docker](https://github.com/aidanharris/bitcannon/wiki/Installing-
 This project is available on:
 * [GitHub](https://github.com/aidanharris/bitcannon)
 * [BitBucket](https://bitbucket.org/aidanharris/bitcannon)
+* [ZeroNet](https://github.com/HelloZeroNet/ZeroNet) - 1KbvKtQs6wKHB1m7YefeFetGMb5eSUxvZH
 
 ## How to use: Simple Set-Up
 [See the Wiki for regular easy set up instructions](https://github.com/aidanharris/bitcannon/wiki)
