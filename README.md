@@ -61,6 +61,12 @@ __(Note: These building instructions may get out of date from time to time due t
 * Optionally install dependencies for eslint (`make eslint-deps`)
 * Run www with node.js (`node www`)
 
+### Packaging
+
+* Run the Makefile (`make`)
+* If using Linux or OS X, [Wine](https://www.winehq.org) is needed in order to set the icon, install wine or edit the Makefile to remove the `--icon` parameter.
+* [7-Zip](http://www.7-zip.org) is needed to make the zip files.
+
 ## Progress
 The early version of BitCannon aims to provide import functionality from bittorrent archives and a simple interface to browse and search your torrent database. Later versions may have more advanced features like auto updating torrent indexes and possibly more.
 
