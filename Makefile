@@ -17,8 +17,8 @@ docker-install:
 	@echo "Read the wiki for configuration options."
 	docker pull mongo
 	docker pull aidanharris/bitcannon
-	docker run --name bc_mongodb -v /srv/mongodb/data/db:/data/db -p 127.0.0.1:27017:27017 -d mongo
-	docker run -it --name bitcannon -p 127.0.0.1:1337:1337 --link mongodb:mongo "aidanharris/bitcannon" bash -c "NODE_ENV=production node /var/www/www --bitcannonPort 1337 --databaseConfig:address \$(getIP)"
+	docker run --name bc_mongodb -v /srv/mongodb/data:/data -p 127.0.0.1:27017:27017 -dt mongo
+	docker run -dt --name bitcannon -p 127.0.0.1:1337:1337 --link bc_mongodb:mongo "aidanharris/bitcannon" bash -c "NODE_ENV=production node /var/www/www --bitcannonPort 1337 --databaseConfig:address \$$(getIP)"
 docker-start:
 	docker start bc_mongodb
 	docker start bitcannon
