@@ -43,9 +43,15 @@ let http;
 let port;
 let address;
 
+const configFile = 'config.json';
+
+const configFileLocation = (
+    typeof(process.versions['atom-shell']) !== 'string'
+  ) ? __dirname + '/' + configFile :
+  __dirname + '/../../' + configFile;
+
 const bitcannon = require('./src/bitcannon/bitcannon-core')(
-    __dirname +
-    '/config.json'
+    configFileLocation
 );
 
 // Handle application exit
