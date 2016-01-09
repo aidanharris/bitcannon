@@ -133,36 +133,7 @@ module.exports = function (configFile) {
 
 
    */
-  const defaultConfig = {
-    bitcannonPort: '1339',
-    bitcannonBindIp: '0.0.0.0',
-    database: 'mongodb',
-    databaseConfig: {
-      address: '127.0.0.1',
-      port: '27017',
-      database: 'bitcannon',
-    },
-    openBrowser: true,
-    debugLevel: 0,
-    scrapeEnabled: true,
-    scrapeDelay: 0,
-    whitelistEnabled: false,
-    whitelistedCategories: [],
-    blacklistEnabled: false,
-    blacklistedCategories: [],
-    categoryAliases: {},
-    trackers: [
-      'udp://open.demonii.com:1337',
-      'udp://tracker.istole.it:80',
-      'udp://tracker.openbittorrent.com:80',
-      'udp://tracker.publicbt.com:80',
-      'udp://tracker.coppersurfer.tk:6969',
-      'udp://tracker.leechers-paradise.org:6969',
-      'udp://exodus.desync.com:6969',
-    ],
-    archives: [],
-    feeds: [],
-  };
+  const defaultConfig = require(__dirname + '/bitcannon-defaultConfig.js');
 
   /*
    If config is undefined we add a default configuration to nconf to be used if
