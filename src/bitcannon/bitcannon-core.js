@@ -134,24 +134,24 @@ module.exports = function (configFile) {
 
    */
   const defaultConfig = {
-    'bitcannonPort': '1339',
-    'bitcannonBindIp': '0.0.0.0',
-    'database': 'mongodb',
-    'databaseConfig': {
-      'address': '127.0.0.1',
-      'port': '27017',
-      'database': 'bitcannon',
+    bitcannonPort: '1339',
+    bitcannonBindIp: '0.0.0.0',
+    database: 'mongodb',
+    databaseConfig: {
+      address: '127.0.0.1',
+      port: '27017',
+      database: 'bitcannon',
     },
-    'openBrowser': true,
-    'debugLevel': 0,
-    'scrapeEnabled': true,
-    'scrapeDelay': 0,
-    'whitelistEnabled': false,
-    'whitelistedCategories': [],
-    'blacklistEnabled': false,
-    'blacklistedCategories': [],
-    'categoryAliases': {},
-    'trackers': [
+    openBrowser: true,
+    debugLevel: 0,
+    scrapeEnabled: true,
+    scrapeDelay: 0,
+    whitelistEnabled: false,
+    whitelistedCategories: [],
+    blacklistEnabled: false,
+    blacklistedCategories: [],
+    categoryAliases: {},
+    trackers: [
       'udp://open.demonii.com:1337',
       'udp://tracker.istole.it:80',
       'udp://tracker.openbittorrent.com:80',
@@ -160,8 +160,8 @@ module.exports = function (configFile) {
       'udp://tracker.leechers-paradise.org:6969',
       'udp://exodus.desync.com:6969',
     ],
-    'archives': [],
-    'feeds': [],
+    archives: [],
+    feeds: [],
   };
 
   /*
@@ -386,13 +386,13 @@ module.exports = function (configFile) {
             // log('Average number of seeders in swarm: ' + numberOfSeeders);
             if (successfulScrapes > 0) {
               return callback(err, {
-                'Leechers': numberOfLeechers,
-                'Seeders': numberOfSeeders,
+                Leechers: numberOfLeechers,
+                Seeders: numberOfSeeders,
               });
             }
             return callback(err, {
-              'Leechers': -1,
-              'Seeders': -1,
+              Leechers: -1,
+              Seeders: -1,
             });
           }
         }
