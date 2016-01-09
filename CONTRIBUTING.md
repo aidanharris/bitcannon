@@ -1,7 +1,17 @@
 # To Do
 
 - [ ] Write Contributing Guide
+- [ ] Write Code of Conduct
+- [ ] Write Filing an Issue
 - [ ] Write Style Guide
+
+## Contents
+
+* [Code of Conduct](#)
+* [Filing an Issue](#)
+* [Style Guide](#)
+
+## Filing an Issue
 
 ## Style Guide
 
