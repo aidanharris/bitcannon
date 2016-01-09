@@ -507,18 +507,31 @@ module.exports = function (configFile) {
                           struct.lastmod = new Date().toISOString();
                           struct.imported = struct.lastmod;
                           struct.size = struct.size || 0;
+                          struct.swarm.seeders = (
+                              struct.swarm.seeders > 0
+                          ) ? struct.swarm.seeders : 0;
+                          struct.swarm.leechers = (
+                              struct.swarm.leechers > 0
+                          ) ? struct.swarm.leechers : 0;
                           module.exports.database.add(struct, function () {
                             log('Added ' + struct.title + ' to the database.');
                           });
                         } else {
                           log('Skipping ' + struct.title);
                           // Should update the seeder and leecher count here
-                          torrent[0].swarm.seeders = struct.swarm.seeders;
-                          torrent[0].swarm.leechers = struct.swarm.leechers;
+                          torrent[0].swarm.seeders = (
+                              struct.swarm.seeders > 0
+                          ) ? struct.swarm.seeders : 0;
+                          torrent[0].swarm.leechers = (
+                              struct.swarm.leechers > 0
+                          ) ? struct.swarm.leechers : 0;
                           record = torrent[0].toObject();
                           recordID = String(torrent[0]._id);
                           delete record._id;
-                          module.exports.database.update.record(recordID, record);
+                          module.exports.database.update.record(
+                              recordID,
+                              record
+                          );
                         }
                       } catch (err) {
                         error(err);
