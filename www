@@ -19,8 +19,8 @@ if (
   try {
     // Allows dumping the heap (dumps can be viewed in chrome dev tools)
     // To produce a dump use `kill -USR 2 pid` on a UNIX like OS or manually
-    // trigger one in node.js using HEAPDUMP.writeSnapshot()
-    const HEAPDUMP = require('heapdump');
+    // trigger one in node.js using heapdump.writeSnapshot()
+    const heapdump = require('heapdump');
   } catch (err) {
     console.warn('Error loading heapdump');
     console.warn(err);
@@ -50,7 +50,7 @@ const CONFIG_FILE_LOCATION = (
   ) ? __dirname + '/' + CONFIG_FILE :
   __dirname + '/../../' + CONFIG_FILE;
 
-const BITCANNON = require('./src/bitcannon/bitcannon-core')(
+const bitcannon = require('./src/bitcannon/bitcannon-core')(
     CONFIG_FILE_LOCATION
 );
 
@@ -60,10 +60,10 @@ process.once('SIGINT', function () {
 });
 
 process.once('exit', function (exitCode) {
-  BITCANNON.exit(((typeof(exitCode) === 'number') ? exitCode : 0));
+  bitcannon.exit(((typeof(exitCode) === 'number') ? exitCode : 0));
 });
 
-if (BITCANNON.config.debugLevel() > 2) {
+if (bitcannon.config.debugLevel() > 2) {
   debug.enable('express:*'); // Detailed output from the express web server
 }
 
@@ -74,31 +74,31 @@ debug.enable('bitcannon:server:error');
 debug = debug('bitcannon:server');
 error = error('bitcannon:server:error');
 
-BITCANNON.log('Connecting to ' + BITCANNON.database.name);
+bitcannon.log('Connecting to ' + bitcannon.database.name);
 
-BITCANNON.database.test(function (err) {
+bitcannon.database.test(function (err) {
   if (err) {
-    BITCANNON.error(
+    bitcannon.error(
       '[ERR] I\'m sorry! I Couldn\'t connect to ' +
-      BITCANNON.database.name +
+      bitcannon.database.name +
       '.'
     );
-    BITCANNON.error('Please make sure it is installed and running.');
-    BITCANNON.exit(1);
+    bitcannon.error('Please make sure it is installed and running.');
+    bitcannon.exit(1);
   } else {
     try {
-      if (BITCANNON.config.openBrowser() !== 'false') {
+      if (bitcannon.config.openBrowser() !== 'false') {
         require('./src/bitcannon/node_modules/opener')('http://' +
             ((address === '0.0.0.0') ? '127.0.0.1' : address) +
             ':' + port + '/');
       }
     } catch (err) {
-      BITCANNON.error('Failed to open browser!');
-      BITCANNON.error(err);
-      BITCANNON.error(err.message);
+      bitcannon.error('Failed to open browser!');
+      bitcannon.error(err);
+      bitcannon.error(err.message);
     }
     // Start the task scheduler for archive providers
-    BITCANNON.tasks.start();
+    bitcannon.tasks.start();
   }
 });
 
@@ -133,8 +133,8 @@ function normalizePort(val) {
 /**
  * Get port from environment and store in Express.
  */
-port = normalizePort(BITCANNON.config.bitcannonPort());
-address = BITCANNON.config.bitcannonBindIp();
+port = normalizePort(bitcannon.config.bitcannonPort());
+address = bitcannon.config.bitcannonBindIp();
 app.set('port', port);
 
 /**
@@ -159,11 +159,11 @@ function onError(err) {
   switch (err.code) {
     case 'EACCES':
       error(bind + ' requires elevated privileges');
-      BITCANNON.exit(1);
+      bitcannon.exit(1);
       break;
     case 'EADDRINUSE':
       error(bind + ' is already in use');
-      BITCANNON.exit(1);
+      bitcannon.exit(1);
       break;
     default:
       throw err;
@@ -177,7 +177,7 @@ function onError(err) {
 function onListening() {
   debug('Listening on ' + address + ':' + port);
   debug(
-    '[OK!] BitCannon is live at http://' +
+    '[OK!] bitcannon is live at http://' +
     ((address === '0.0.0.0') ? '127.0.0.1' : address) +
     ':' + port + '/'
   );

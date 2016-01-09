@@ -193,7 +193,7 @@ module.exports = function (configFile) {
 
   const providers = (function () {
     // Database schema - All database providers must implement this
-    const schema = {
+    const SCHEMA = {
       _id: String,
       title: String,
       category: String,
@@ -208,17 +208,17 @@ module.exports = function (configFile) {
     };
     const torrentStruct = function () {
       return {
-        _id: schema._id,
-        title: schema.title,
-        category: schema.category,
-        size: schema.size,
-        details: schema.details,
+        _id: SCHEMA._id,
+        title: SCHEMA.title,
+        category: SCHEMA.category,
+        size: SCHEMA.size,
+        details: SCHEMA.details,
         swarm: {
-          seeders: schema.swarm.seeders,
-          leechers: schema.swarm.leechers,
+          seeders: SCHEMA.swarm.seeders,
+          leechers: SCHEMA.swarm.leechers,
         },
-        lastmod: schema.lastmod,
-        imported: schema.imported,
+        lastmod: SCHEMA.lastmod,
+        imported: SCHEMA.imported,
       };
     };
     function logFn(provider) {
@@ -277,19 +277,19 @@ module.exports = function (configFile) {
   })();
 
   function scrapeTorrent(btih, callback) {
-    const magnet = 'magnet:?xt=urn:btih:' +
+    const MAGNET = 'magnet:?xt=urn:btih:' +
       btih +
       '&tr=' +
       encodeURIComponent(config.trackers().toString())
         .replace(new RegExp('%2C', 'g'), '&tr=');
 
     // { infoHash: 'xxx', length: xx, announce: ['xx', 'xx'] }
-    const parsedTorrent = parseTorrent(magnet);
+    const PARSED_TORRENT = parseTorrent(MAGNET);
 
-    const peerId = new Buffer('01234567890123456789');
-    const port = 6881;
+    const PEER_ID = new Buffer('01234567890123456789');
+    const PORT = 6881;
 
-    let client = new Client(peerId, port, parsedTorrent);
+    let client = new Client(PEER_ID, PORT, PARSED_TORRENT, undefined);
     /* eslint-disable no-unused-vars */
     let errorHandeler;
     let warning;
@@ -299,7 +299,7 @@ module.exports = function (configFile) {
     let numberOfSeeders = 0;
     let numberOfLeechers = 0;
     let successfulScrapes = 0;
-    let trackers = JSON.parse(JSON.stringify(parsedTorrent.announce));
+    let trackers = JSON.parse(JSON.stringify(PARSED_TORRENT.announce));
 
 
     let callbackCalled = false;
@@ -322,7 +322,7 @@ module.exports = function (configFile) {
             scrape = undefined;
 
             if (config.debugLevel() > 1) {
-              log('[OK] Finished Scraping ' + parsedTorrent.infoHash);
+              log('[OK] Finished Scraping ' + PARSED_TORRENT.infoHash);
             }
             // log('Average number of leechers in swarm: ' + numberOfLeechers);
             // log('Average number of seeders in swarm: ' + numberOfSeeders);
@@ -395,7 +395,7 @@ module.exports = function (configFile) {
 
   function tasks() {
     // All scheduled tasks will be pushed to this array
-    const jobs = [];
+    const JOBS = [];
     // All archive providers will be stored here before
     // being pushed to the jobs array
     // let archives = [];
@@ -404,7 +404,7 @@ module.exports = function (configFile) {
     // let feeds = [];
 
     function startup(callback) {
-      if (jobs.length === 0) {
+      if (JOBS.length === 0) {
         // Load modules
         if (config.archives().length > 0) {
           log('Loading archive providers...');
