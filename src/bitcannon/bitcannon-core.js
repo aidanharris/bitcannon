@@ -499,6 +499,7 @@ module.exports = function (configFile) {
               if (!err) {
                 module.exports.database.exists(struct._id,
                     function (err, torrent) {
+                      /* eslint-disable no-param-reassign */
                       let record;
                       let recordID;
                       try {
@@ -523,6 +524,7 @@ module.exports = function (configFile) {
                         error(err);
                         throw err;
                       }
+                      /* eslint-enable no-param-reassign */
                     }
                 );
               } else {
