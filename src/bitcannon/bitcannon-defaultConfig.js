@@ -1,29 +1,31 @@
-/*
- Default configuration
+/**
+ # Default configuration
 
- bitcannonPort: The port the web server will listen on.
- bitcannonBindIp: The network interface that the server will bind to.
- - Should we bind to localhost (127.0.0.1) by default?
- databse: The database provider to use. If not given the default
- provider (mongodb) is used.
+ - bitcannonPort: The port the web server will listen on.
+ - bitcannonBindIp: The network interface that the server will bind to.
+ \c- Should we bind to localhost (127.0.0.1) by default?
+ - databse: The database provider to use.
+ If not given the default provider (mongodb) is used.
 
- scrapeEnabled:
- scrapeDelay:
- Unsure what the above two parameters do.
+ - scrapeEnabled:
+ - scrapeDelay:
+ - Unsure what the above two parameters do.
  Need to find out what they do and document them
 
- whitelistEnabled: Should the category whitelist be enabled
- whitelistedCategories: The list of categories to restrict Bitcannon to.
+ - whitelistEnabled: Should the category whitelist be enabled
+ - whitelistedCategories: The list of categories to restrict Bitcannon to.
  It will only import torrents that are in these categories.
- blacklistEnabled: Should the category blacklist be enabled.
- blacklistedCategories: The list of categories to block from Bitcannon.
- categoryAliases: Aliases for categories in the JSON format as follows:
+ - blacklistEnabled: Should the category blacklist be enabled.
+ - blacklistedCategories: The list of categories to block from Bitcannon.
+ - categoryAliases: Aliases for categories in the JSON format as follows:
+ @code
  {
- category: ['category 1', 'category 2']
+   category: ['category 1', 'category 2']
  }
- trackers: Which trackers to use
- archives: Which archives to use
- feeds: A list of RSS feeds to import
+ @endcode
+ - trackers: Which trackers to use
+ - archives: Which archives to use
+ - feeds: A list of RSS feeds to import
  */
 
 module.exports = {
