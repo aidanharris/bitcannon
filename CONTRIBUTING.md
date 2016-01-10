@@ -1,4 +1,6 @@
-# To Do
+# Contributing
+
+## To Do
 
 - [ ] Write Contributing Guide
 - [ ] Write Code of Conduct
@@ -21,7 +23,7 @@ A style guide helps to ensure that the code everyone produces is consistent. Bit
 
 This prohibits the use of function expressions. BitCannon allows function expressions on the basis that if a function should not change it should be a constant function expression, which means it will **not** change should someone attempt to override it. For example:
 
-```
+<pre><code>
 // bad - myFunc is overridden
 function myFunc () {
   console.log('Hello, World!');
@@ -43,13 +45,13 @@ myFunc = function () {
 }
 
 myFunc(); // 'Hello, World!'
-```
+</code></pre>
 
 ### Constants
 
 Constants should be used whenever a value should not change. Constants should always be written in uppercase unless the constant is a function or an object that contains functions. For example:
 
-```
+<pre><code>
 // Bad
 var abc = 'This does not change';
 
@@ -80,4 +82,4 @@ var myStruct = {
 const MY_STRUCT = {
   hello: 'world';
 }
-```
+</code></pre>

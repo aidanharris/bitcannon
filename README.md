@@ -1,23 +1,25 @@
 # BitCannon
 A torrent site mirroring tool
 
-[![devDependency Status](https://david-dm.org/aidanharris/bitcannon/dev-status.svg)](https://david-dm.org/aidanharris/bitcannon#info=devDependencies)
+<strong>[Developer Dependencies](https://david-dm.org/aidanharris/bitcannon#info=devDependencies)</strong>
 
-**Bitcannon-Core**:
+![](https://david-dm.org/aidanharris/bitcannon/dev-status.svg)
 
-[![Dependency Status](https://david-dm.org/aidanharris/bitcannon.svg?path=src/bitcannon)](https://david-dm.org/aidanharris/bitcannon?path=src/bitcannon)
+<strong>[Bitcannon-Core](https://david-dm.org/aidanharris/bitcannon?path=src/bitcannon)</strong>
 
-**Bitcannon-Server**
+![](https://david-dm.org/aidanharris/bitcannon.svg?path=src/bitcannon)
 
-[![Dependency Status](https://david-dm.org/aidanharris/bitcannon.svg?path=src/server)](https://david-dm.org/aidanharris/bitcannon?path=src/server)
+<strong>[Bitcannon-Server](https://david-dm.org/aidanharris/bitcannon?path=src/server)</strong>
 
-**Bitcannon-MongoDB**
+![](https://david-dm.org/aidanharris/bitcannon.svg?path=src/server)
 
-[![Dependency Status](https://david-dm.org/aidanharris/bitcannon.svg?path=src/providers/database/mongodb)](https://david-dm.org/aidanharris/bitcannon?path=src/providers/database/mongodb)
+<strong>[Bitcannon-MongoDB](https://david-dm.org/aidanharris/bitcannon?path=src/providers/database/mongodb)</strong>
 
-**Bitcannon-Torrent-RSS-Feed-Parser**
+![](https://david-dm.org/aidanharris/bitcannon.svg?path=src/providers/database/mongodb)
 
-[![Dependency Status](https://david-dm.org/aidanharris/bitcannon.svg?path=src/providers/rss)](https://david-dm.org/aidanharris/bitcannon?path=src/providers/rss)
+<strong>[Bitcannon-Torrent-RSS-Feed-Parser](https://david-dm.org/aidanharris/bitcannon?path=src/providers/rss)</strong>
+
+![](https://david-dm.org/aidanharris/bitcannon.svg?path=src/providers/rss)
 
 ## About
 The goal of BitCannon is to provide the tools to easily aggregate the content of many torrent sites into an easily browse-able format.
@@ -46,7 +48,7 @@ This project is available on:
 * NodeJS
 * Bower
 
-__(Note: These building instructions may get out of date from time to time due to code changes. If you just want to use BitCannon, you should use the Wiki instructions instead.)__
+<strong>(Note: These building instructions may get out of date from time to time due to code changes. If you just want to use BitCannon, you should use the Wiki instructions instead.)</strong>
 
 ### MongoDB
 * Install and run MongoDB from official packages
