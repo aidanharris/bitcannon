@@ -1,6 +1,7 @@
 bower_components
 BitCannon.zip
 config.json
+docs/
 
 #Node.js .gitignore file
 #https://github.com/github/gitignore/blob/master/Node.gitignore
