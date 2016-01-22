@@ -26,7 +26,7 @@ docker-stop:
 	docker stop bc_mongodb
 	docker stop bitcannon
 documentation:
-	doxygen doxygen.conf
+	doxygen Doxyfile
 clean:
 	@rm -rf node_modules
 	@rm -rf src/bitcannon/node_modules
