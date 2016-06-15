@@ -1,4 +1,6 @@
-# BitCannon
+# [DEPRECATED] - Please use [bitcannon-web](https://github.com/bitcannon-org/bitcannon-web)
+
+## BitCannon
 A torrent site mirroring tool
 
 <strong>[Developer Dependencies](https://david-dm.org/aidanharris/bitcannon#info=devDependencies)</strong>
